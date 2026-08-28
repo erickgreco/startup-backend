@@ -1,0 +1,9 @@
+tmp
+.env
+.envrc
+services/*/.env
+infra/development/docker/.env
+bin/
+
+# Tilt build
+build/
