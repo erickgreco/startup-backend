@@ -1,0 +1,38 @@
+flowchart TB
+    subgraph domain["📦 domain (núcleo, sin dependencias externas)"]
+        M["LeadsModel<br/>(struct puro)"]
+        RI["LeadRepository<br/>(interfaz)"]
+        SI["LeadService<br/>(interfaz)"]
+    end
+
+    subgraph infra_data["infrastructure — datos"]
+        REPO["repository/leads_repo.go<br/>implementa LeadRepository"]
+    end
+
+    subgraph biz["service — lógica de negocio"]
+        SVC["service/leads_serv.go<br/>implementa LeadService<br/>recibe domain.LeadRepository"]
+    end
+
+    subgraph infra_http["infrastructure — HTTP"]
+        HAND["http/handler/leads_handler.go<br/>recibe domain.LeadService"]
+        ROUT["http/router/router.go<br/>conoce *handler.X<br/>NUNCA importa service ni repository"]
+    end
+
+    subgraph composition["composition root"]
+        SRV["cmd/server/server.go<br/>buildHandlers():<br/>repo → service → handler<br/>router.Setup(r, handlers)"]
+        MAIN["cmd/api/main.go<br/>config → db conn → server.New → Run"]
+    end
+
+    REPO -.implementa.-> RI
+    SVC -.implementa.-> SI
+    REPO --> SVC
+    SVC --> HAND
+    HAND --> ROUT
+    ROUT --> SRV
+    SRV --> MAIN
+
+    style domain fill:#2d3748,stroke:#63b3ed,color:#fff
+    style infra_data fill:#2d3748,stroke:#68d391,color:#fff
+    style biz fill:#2d3748,stroke:#f6ad55,color:#fff
+    style infra_http fill:#2d3748,stroke:#fc8181,color:#fff
+    style composition fill:#2d3748,stroke:#d6bcfa,color:#fff

@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant C as Cliente
+    participant R as router.go
+    participant H as LeadsHandler
+    participant S as LeadsService
+    participant Repo as LeadsRepository
+    participant DB as Postgres
+
+    C->>R: POST /api/v1/leads (JSON)
+    R->>H: h.Create(ctx)
+    H->>H: bind JSON → dto.CreateLeadRequest
+    H->>H: req.ToDomain() → *domain.LeadsModel
+    H->>S: svc.CreateLead(ctx, lead)
+    S->>S: aplica reglas de negocio<br/>(ej: status inicial = "new")
+    S->>Repo: repo.CreateLead(ctx, lead)
+    Repo->>DB: INSERT INTO leads (...)
+    DB-->>Repo: OK
+    Repo-->>S: nil (o error)
+    S-->>H: nil (o error)
+    H->>H: dto.FromLeadDomain(lead)
+    H-->>C: 201 Created + JSON
