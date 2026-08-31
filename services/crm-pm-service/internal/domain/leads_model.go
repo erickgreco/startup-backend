@@ -12,9 +12,28 @@ type LeadsModel struct {
 	Name      string
 	Email     string
 	Message   string
-	Status    string //? new, quoted, converted, lost
+	Status    string //? new, quoted, converted, lost,	merged-en caso que exista un duplicado de cotizacion
+	Source    LeadSource
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+type LeadSource string
+
+const (
+	LeadSrcLandingPage LeadSource = "landing_page"
+	LeadSrcEmail       LeadSource = "email"
+	LeadSrcWsApp       LeadSource = "whatsapp"
+	LeadSrcManual      LeadSource = "manual"
+)
+
+func (s LeadSource) IsValid() bool {
+	switch s {
+	case LeadSrcLandingPage, LeadSrcEmail, LeadSrcWsApp, LeadSrcManual:
+		return true
+	default:
+		return false
+	}
 }
 
 type LeadRepository interface {

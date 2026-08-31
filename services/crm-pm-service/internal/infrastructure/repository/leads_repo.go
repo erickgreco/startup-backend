@@ -25,10 +25,10 @@ func NewLeadRepository(pool *pgxpool.Pool) *LeadRepository {
 func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel) error {
 	query := `
 		INSERT INTO Leads (
-			id, name, email, message, status
+			id, name, email, message, status, source
 		)
 		VALUES (
-			$1, $2, $3, $4, $5
+			$1, $2, $3, $4, $5, $6
 		)
 	`
 
@@ -43,6 +43,7 @@ func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel
 		lead.Email,
 		lead.Message,
 		lead.Status,
+		lead.Source,
 	)
 	if err != nil {
 		return err
