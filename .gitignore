@@ -1,9 +1,18 @@
-tmp
+tmp/
+bin/
+
+# Secrets
 .env
 .envrc
 services/*/.env
 infra/development/docker/.env
-bin/
+
+# Dependencies
+node_modules
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Tilt build
 build/
