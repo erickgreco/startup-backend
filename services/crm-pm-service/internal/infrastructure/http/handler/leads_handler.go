@@ -6,6 +6,7 @@ import (
 	"github.com/erickgreco/startup-backend/shared/response"
 	"github.com/erickgreco/startup-backend/shared/validator"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // ! Handler nunca importa service ni repository directamente, solo conoce el tipo domain.(Service)
@@ -61,4 +62,26 @@ func (h *LeadsHandler) GetByStatus(c *gin.Context) {
 	}
 
 	response.Ok(c, dto.FromLeadDomainList(leads))
+}
+
+func (h *LeadsHandler) GetByID(c *gin.Context) {
+	idParam := c.Param("id")
+	if idParam == "" {
+		response.BadRequest(c, ErrMissingIDParam)
+		return
+	}
+
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		response.BadRequest(c, ErrInvalidLeadID)
+		return
+	}
+
+	lead, err := h.service.GetLeadByID(c.Request.Context(), id)
+	if err != nil {
+		mapDomainError(c, "failed_to_get_lead_by_id", err)
+		return
+	}
+
+	response.Ok(c, dto.FromLeadDomain(lead))
 }

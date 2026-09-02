@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -125,4 +126,41 @@ func (r *LeadRepository) GetLeadsByStatus(ctx context.Context, status domain.Lea
 	}
 
 	return leads, nil
+}
+
+func (r *LeadRepository) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain.LeadsModel, error) {
+	var lead domain.LeadsModel
+
+	query := `
+		SELECT id, name, email, message, status, source, created_at, updated_at
+		FROM leads
+		WHERE id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
+	defer cancel()
+
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		id,
+	).Scan(
+		&lead.ID,
+		&lead.Name,
+		&lead.Email,
+		&lead.Message,
+		&lead.Status,
+		&lead.Source,
+		&lead.CreatedAt,
+		&lead.UpdatedAt,
+	)
+	if err != nil {
+		mappedErr := mapReadError(err)
+		if errors.Is(mappedErr, ErrNotFound) {
+			return nil, domain.ErrNotFound
+		}
+		return nil, fmt.Errorf("leads_repo: get_lead_by_id: %w", mappedErr)
+	}
+
+	return &lead, nil
 }

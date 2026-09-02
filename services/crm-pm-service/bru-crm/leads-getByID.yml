@@ -1,0 +1,16 @@
+info:
+  name: leads-getByID
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{baseURL}}/leads/6ed564b0-1553-4c76-b8e0-63e587ab8f8f"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

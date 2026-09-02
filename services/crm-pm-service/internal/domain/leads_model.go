@@ -49,9 +49,11 @@ func (s LeadSource) IsValid() bool {
 type LeadRepository interface {
 	CreateLead(ctx context.Context, lead *LeadsModel) error
 	GetLeadsByStatus(ctx context.Context, status LeadStatus) ([]*LeadsModel, error)
+	GetLeadByID(ctx context.Context, id uuid.UUID) (*LeadsModel, error)
 }
 
 type LeadService interface {
 	CreateLead(ctx context.Context, lead *LeadsModel) error
 	GetLeadsByStatus(ctx context.Context, status LeadStatus) ([]*LeadsModel, error)
+	GetLeadByID(ctx context.Context, id uuid.UUID) (*LeadsModel, error)
 }

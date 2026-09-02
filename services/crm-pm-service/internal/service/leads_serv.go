@@ -45,3 +45,12 @@ func (s *LeadService) GetLeadsByStatus(ctx context.Context, status domain.LeadSt
 
 	return leads, nil
 }
+
+func (s *LeadService) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain.LeadsModel, error) {
+	lead, err := s.repo.GetLeadByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("leads_service: get_lead_by_id: %w", err)
+	}
+
+	return lead, nil
+}

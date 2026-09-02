@@ -13,6 +13,8 @@ var (
 	ErrInvalidReqBody     = errors.New("invalid_request_body")
 	ErrValidationFailed   = errors.New("validation_failed")
 	ErrMissingStatusParam = errors.New("status_query_parameter_is_required")
+	ErrMissingIDParam     = errors.New("id_query_parameter_is_required")
+	ErrInvalidLeadID      = errors.New("invalid_lead_id")
 )
 
 func mapDomainError(c *gin.Context, logMsg string, err error) {
