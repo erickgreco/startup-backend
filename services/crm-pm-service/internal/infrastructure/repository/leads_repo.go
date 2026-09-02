@@ -30,12 +30,13 @@ func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel
 		VALUES (
 			$1, $2, $3, $4, $5, $6
 		)
+		RETURNING created_at, updated_at
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
 	defer cancel()
 
-	_, err := r.pool.Exec(
+	err := r.pool.QueryRow(
 		ctx,
 		query,
 		lead.ID,
@@ -44,9 +45,12 @@ func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel
 		lead.Message,
 		lead.Status,
 		lead.Source,
+	).Scan(
+		&lead.CreatedAt,
+		&lead.UpdatedAt,
 	)
 	if err != nil {
-		return err
+		return mapCreateLeadDBError(err)
 	}
 
 	return nil
