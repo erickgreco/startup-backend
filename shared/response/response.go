@@ -1,6 +1,7 @@
 package response
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,12 +13,30 @@ type Response struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func BadRequest(c *gin.Context, err error) {
-	c.JSON(http.StatusBadRequest, Response{Error: err.Error()})
+// Creado para no filtrar errores especificos
+var (
+	errInternal = errors.New("internal_server_error")
+)
+
+func Error(c *gin.Context, status int, err error) {
+	c.JSON(status, Response{Error: err.Error()})
 }
 
-func InternalServerError(c *gin.Context, err error) {
-	c.JSON(http.StatusInternalServerError, Response{Error: err.Error()})
+func BadRequest(c *gin.Context, err error) {
+	Error(c, http.StatusConflict, err)
+}
+
+// ! No recibe error para evitar filtrar detalles internos
+func InternalServerError(c *gin.Context) {
+	Error(c, http.StatusInternalServerError, errInternal)
+}
+
+func GatewayTimeout(c *gin.Context, err error) {
+	Error(c, http.StatusGatewayTimeout, err)
+}
+
+func Conflict(c *gin.Context, err error) {
+	Error(c, http.StatusConflict, err)
 }
 
 func Created(c *gin.Context, data any) {
