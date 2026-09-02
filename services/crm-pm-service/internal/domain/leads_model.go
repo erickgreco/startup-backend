@@ -48,6 +48,7 @@ func (s LeadSource) IsValid() bool {
 
 type LeadRepository interface {
 	CreateLead(ctx context.Context, lead *LeadsModel) error
+	GetLeadByDate(ctx context.Context, date time.Time) (*LeadsModel, error)
 }
 
 type LeadService interface {
