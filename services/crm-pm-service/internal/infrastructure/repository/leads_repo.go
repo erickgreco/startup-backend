@@ -76,39 +76,53 @@ func translateWriteError(err error) error {
 	return mappedErr
 }
 
-func (r *LeadRepository) GetLeadByStatus(ctx context.Context, status domain.LeadStatus) (*domain.LeadsModel, error) {
-	var lead domain.LeadsModel
-
+func (r *LeadRepository) GetLeadsByStatus(ctx context.Context, status domain.LeadStatus) ([]*domain.LeadsModel, error) {
 	query := `
 		SELECT id, name, email, message, status, source, created_at, updated_at
 		FROM leads
-		WHERE created_at = $1
+		WHERE status = $1
+		ORDER BY created_at DESC
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
 	defer cancel()
 
-	err := r.pool.QueryRow(
+	rows, err := r.pool.Query(
 		ctx,
 		query,
 		status,
-	).Scan(
-		&lead.ID,
-		&lead.Name,
-		&lead.Email,
-		&lead.Message,
-		&lead.Status,
-		&lead.Source,
-		&lead.CreatedAt,
-		&lead.UpdatedAt,
 	)
 	if err != nil {
 		mappedErr := mapReadError(err)
-		if errors.Is(mappedErr, ErrNotFound) {
-			return nil, domain.ErrNotFound
+		return nil, fmt.Errorf("leads_repo: get_lead_by_status: %w", mappedErr)
+	}
+	defer rows.Close()
+
+	var leads []*domain.LeadsModel
+	for rows.Next() {
+		var lead domain.LeadsModel
+		if err := rows.Scan(
+			&lead.ID,
+			&lead.Name,
+			&lead.Email,
+			&lead.Message,
+			&lead.Status,
+			&lead.Source,
+			&lead.CreatedAt,
+			&lead.UpdatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("leads_repo: get_leads_by_status: %w", err)
 		}
-		return nil, fmt.Errorf("leads_repo: get_lead_by_date: %w", mappedErr)
+		leads = append(leads, &lead)
 	}
 
-	return &lead, nil
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("leads_repo: get_leads_by_status: %w", err)
+	}
+
+	if len(leads) == 0 {
+		return nil, domain.ErrNotFound
+	}
+
+	return leads, nil
 }

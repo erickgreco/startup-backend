@@ -39,6 +39,14 @@ func Conflict(c *gin.Context, err error) {
 	Error(c, http.StatusConflict, err)
 }
 
+func NotFound(c *gin.Context, err error) {
+	Error(c, http.StatusNotFound, err)
+}
+
 func Created(c *gin.Context, data any) {
 	c.JSON(http.StatusCreated, Response{Data: data})
+}
+
+func Ok(c *gin.Context, data any) {
+	c.JSON(http.StatusOK, Response{Data: data})
 }

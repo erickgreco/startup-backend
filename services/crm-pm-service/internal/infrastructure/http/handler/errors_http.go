@@ -10,22 +10,23 @@ import (
 )
 
 var (
-	ErrInvalidReqBody   = errors.New("invalid_request_body")
-	ErrValidationFailed = errors.New("validation_failed")
+	ErrInvalidReqBody     = errors.New("invalid_request_body")
+	ErrValidationFailed   = errors.New("validation_failed")
+	ErrMissingStatusParam = errors.New("status_query_parameter_is_required")
 )
 
-func mapCreateLeadError(c *gin.Context, err error) {
+func mapDomainError(c *gin.Context, logMsg string, err error) {
 	switch {
 	case errors.Is(err, domain.ErrEmailAlreadyExists):
 		response.Conflict(c, err)
-	case errors.Is(err, domain.ErrInvalidSource):
-		response.BadRequest(c, err)
-	case errors.Is(err, domain.ErrMissingRequiredFields):
+	case errors.Is(err, domain.ErrInvalidSource), errors.Is(err, domain.ErrMissingRequiredFields):
 		response.BadRequest(c, err)
 	case errors.Is(err, domain.ErrRepoTimeout):
 		response.GatewayTimeout(c, err)
+	case errors.Is(err, domain.ErrNotFound):
+		response.NotFound(c, err)
 	default:
-		logger.Error("failed_to_create_lead", err)
+		logger.Error(logMsg, err)
 		response.InternalServerError(c)
 	}
 }

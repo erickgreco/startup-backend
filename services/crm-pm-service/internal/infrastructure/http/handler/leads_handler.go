@@ -38,9 +38,27 @@ func (h *LeadsHandler) Create(c *gin.Context) {
 	lead.Source = domain.LeadSrcManual
 
 	if err := h.service.CreateLead(c.Request.Context(), lead); err != nil {
-		mapCreateLeadError(c, err)
+		mapDomainError(c, "failed_to_create_lead", err)
 		return
 	}
 
 	response.Created(c, dto.FromLeadDomain(lead))
+}
+
+func (h *LeadsHandler) GetByStatus(c *gin.Context) {
+	statusParam := c.Query("status")
+	if statusParam == "" {
+		response.BadRequest(c, ErrMissingStatusParam)
+		return
+	}
+
+	status := domain.LeadStatus(statusParam)
+
+	leads, err := h.service.GetLeadsByStatus(c.Request.Context(), status)
+	if err != nil {
+		mapDomainError(c, "failed_to_get_lead_by_status", err)
+		return
+	}
+
+	response.Ok(c, dto.FromLeadDomainList(leads))
 }

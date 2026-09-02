@@ -13,6 +13,7 @@ type LeadResponse struct {
 	Email     string            `json:"email"`
 	Message   string            `json:"message"`
 	Status    domain.LeadStatus `json:"status"`
+	Source    domain.LeadSource `json:"source"`
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
 }
@@ -24,7 +25,16 @@ func FromLeadDomain(l *domain.LeadsModel) LeadResponse {
 		Email:     l.Email,
 		Message:   l.Message,
 		Status:    l.Status,
+		Source:    l.Source,
 		CreatedAt: l.CreatedAt,
 		UpdatedAt: l.UpdatedAt,
 	}
+}
+
+func FromLeadDomainList(ls []*domain.LeadsModel) []LeadResponse {
+	res := make([]LeadResponse, 0, len(ls))
+	for _, l := range ls {
+		res = append(res, FromLeadDomain(l))
+	}
+	return res
 }

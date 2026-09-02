@@ -31,7 +31,7 @@ func registerLeadsRoutes(rg *gin.RouterGroup, h *handler.LeadsHandler) {
 	leads := rg.Group("/leads")
 	{
 		leads.POST("", h.Create)
-		// leads.GET("", h.List)
+		leads.GET("", h.GetByStatus)
 		// leads.GET("/:id", h.GetByID)
 		// leads.PATCH("/:id", h.Update)
 		// leads.DELETE("/:id", h.Delete)
