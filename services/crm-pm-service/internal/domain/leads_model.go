@@ -7,12 +7,22 @@ import (
 	"github.com/google/uuid"
 )
 
+type LeadStatus string
+
+const (
+	LeadStatusNew       LeadStatus = "new"
+	LeadStatusQuoted    LeadStatus = "quoted"
+	LeadStatusConverted            = "converted"
+	LeadStatusLost                 = "lost"
+	LeadStatusMerged               = "merged"
+)
+
 type LeadsModel struct {
 	ID        uuid.UUID
 	Name      string
 	Email     string
 	Message   string
-	Status    string //? new, quoted, converted, lost,	merged-en caso que exista un duplicado de cotizacion
+	Status    LeadStatus //? new, quoted, converted, lost,	merged-en caso que exista un duplicado de cotizacion
 	Source    LeadSource
 	CreatedAt time.Time
 	UpdatedAt time.Time
