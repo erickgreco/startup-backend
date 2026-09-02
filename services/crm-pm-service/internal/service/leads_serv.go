@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
@@ -19,18 +18,21 @@ func NewLeadService(repo domain.LeadRepository) *LeadService {
 	}
 }
 
-// TODO: trabajar con el source
 func (s *LeadService) CreateLead(ctx context.Context, lead *domain.LeadsModel) error {
 	if !lead.Source.IsValid() {
-		return fmt.Errorf("leads_service: invalid_source %q: %w", lead.Source, errors.New("invalid_input")) //TODO: centralizar errores
+		return fmt.Errorf("service: create_lead: source %q: %w", lead.Source, domain.ErrInvalidSource)
 	}
 
 	if lead.Name == "" || lead.Email == "" {
-		return errors.New("name and email are required")
+		return fmt.Errorf("service: create_lead: %w", domain.ErrMissingRequiredFields)
 	}
 
 	lead.ID = uuid.New()
-	lead.Status = "new"
+	lead.Status = domain.LeadStatusNew
 
-	return s.repo.CreateLead(ctx, lead)
+	if err := s.repo.CreateLead(ctx, lead); err != nil {
+		return fmt.Errorf("service: created_lead: %w", err)
+	}
+
+	return nil
 }
