@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:8081/api/v1/leads?status=new
+  url: "{{baseURL}}/leads?status=new"
   params:
     - name: status
       value: new

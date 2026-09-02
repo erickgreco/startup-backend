@@ -5,13 +5,13 @@ info:
 
 http:
   method: POST
-  url: http://localhost:8081/api/v1/leads
+  url: "{{baseURL}}/leads"
   body:
     type: json
     data: |-
       {
         "name": "Erick",
-        "email": "email2@email.com",
+        "email": "email3@email.com",
         "message": "first test"
       }
   auth: inherit
