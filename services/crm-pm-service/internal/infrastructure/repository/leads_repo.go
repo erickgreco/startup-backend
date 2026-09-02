@@ -76,7 +76,7 @@ func translateWriteError(err error) error {
 	return mappedErr
 }
 
-func (r *LeadRepository) GetLeadByDate(ctx context.Context, date time.Time) (*domain.LeadsModel, error) {
+func (r *LeadRepository) GetLeadByStatus(ctx context.Context, status domain.LeadStatus) (*domain.LeadsModel, error) {
 	var lead domain.LeadsModel
 
 	query := `
@@ -91,7 +91,7 @@ func (r *LeadRepository) GetLeadByDate(ctx context.Context, date time.Time) (*do
 	err := r.pool.QueryRow(
 		ctx,
 		query,
-		date,
+		status,
 	).Scan(
 		&lead.ID,
 		&lead.Name,
