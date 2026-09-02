@@ -11,4 +11,5 @@ var (
 	ErrInvalidSource         = errors.New("invalid_source")
 	ErrMissingRequiredFields = errors.New("missing_required_fields")
 	ErrReqTimeout            = errors.New("request_timed_out, please_try_again")
+	ErrNotFound              = errors.New("data_not_found")
 )
