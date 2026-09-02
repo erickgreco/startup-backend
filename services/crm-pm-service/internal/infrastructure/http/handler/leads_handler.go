@@ -20,24 +20,25 @@ func NewLeadsHandler(service domain.LeadService) *LeadsHandler {
 	}
 }
 
+// TODO: por ahora el source es hardcodeado, debera cambiar
 func (h *LeadsHandler) Create(c *gin.Context) {
 	var req dto.CreateLeadRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, response.ErrInvalidReqBody)
+		response.BadRequest(c, ErrInvalidReqBody)
 		return
 	}
 
 	if err := validator.Validate.Struct(req); err != nil {
-		response.BadRequest(c, response.ErrValidationFailed)
+		response.BadRequest(c, ErrValidationFailed)
 		return
 	}
 
 	lead := req.ToDomain()
+	lead.Source = domain.LeadSrcManual
 
 	if err := h.service.CreateLead(c.Request.Context(), lead); err != nil {
-		// TODO: mapear dependiendo el error para evitar filtrar info
-		response.InternalServerError(c, err)
+		mapCreateLeadError(c, err)
 		return
 	}
 
