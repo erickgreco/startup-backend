@@ -4,7 +4,6 @@ import (
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/infrastructure/http/dto"
 	"github.com/erickgreco/startup-backend/shared/response"
-	"github.com/erickgreco/startup-backend/shared/validator"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -27,11 +26,6 @@ func (h *LeadsHandler) Create(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, ErrInvalidReqBody)
-		return
-	}
-
-	if err := validator.Validate.Struct(req); err != nil {
-		response.BadRequest(c, ErrValidationFailed)
 		return
 	}
 
@@ -66,11 +60,6 @@ func (h *LeadsHandler) GetByStatus(c *gin.Context) {
 
 func (h *LeadsHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
-	if idParam == "" {
-		response.BadRequest(c, ErrMissingIDParam)
-		return
-	}
-
 	id, err := uuid.Parse(idParam)
 	if err != nil {
 		response.BadRequest(c, ErrInvalidLeadID)
@@ -80,6 +69,32 @@ func (h *LeadsHandler) GetByID(c *gin.Context) {
 	lead, err := h.service.GetLeadByID(c.Request.Context(), id)
 	if err != nil {
 		mapDomainError(c, "failed_to_get_lead_by_id", err)
+		return
+	}
+
+	response.Ok(c, dto.FromLeadDomain(lead))
+}
+
+func (h *LeadsHandler) UpdateStatus(c *gin.Context) {
+	var req dto.UpdateLeadStatusRequest
+
+	idParam := c.Param("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		response.BadRequest(c, ErrInvalidLeadID)
+		return
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, ErrInvalidReqBody)
+		return
+	}
+
+	status := domain.LeadStatus(req.Status)
+
+	lead, err := h.service.UpdateLeadStatus(c.Request.Context(), id, status)
+	if err != nil {
+		mapDomainError(c, "failed_to_update_lead_status", err)
 		return
 	}
 

@@ -12,9 +12,9 @@ type LeadStatus string
 const (
 	LeadStatusNew       LeadStatus = "new"
 	LeadStatusQuoted    LeadStatus = "quoted"
-	LeadStatusConverted            = "converted"
-	LeadStatusLost                 = "lost"
-	LeadStatusMerged               = "merged"
+	LeadStatusConverted LeadStatus = "converted"
+	LeadStatusLost      LeadStatus = "lost"
+	LeadStatusMerged    LeadStatus = "merged"
 )
 
 type LeadsModel struct {
@@ -46,14 +46,25 @@ func (s LeadSource) IsValid() bool {
 	}
 }
 
+func (s LeadStatus) IsValid() bool {
+	switch s {
+	case LeadStatusNew, LeadStatusQuoted, LeadStatusConverted, LeadStatusLost, LeadStatusMerged:
+		return true
+	default:
+		return false
+	}
+}
+
 type LeadRepository interface {
 	CreateLead(ctx context.Context, lead *LeadsModel) error
 	GetLeadsByStatus(ctx context.Context, status LeadStatus) ([]*LeadsModel, error)
 	GetLeadByID(ctx context.Context, id uuid.UUID) (*LeadsModel, error)
+	UpdateLeadStatus(ctx context.Context, id uuid.UUID, status LeadStatus) (*LeadsModel, error)
 }
 
 type LeadService interface {
 	CreateLead(ctx context.Context, lead *LeadsModel) error
 	GetLeadsByStatus(ctx context.Context, status LeadStatus) ([]*LeadsModel, error)
 	GetLeadByID(ctx context.Context, id uuid.UUID) (*LeadsModel, error)
+	UpdateLeadStatus(ctx context.Context, id uuid.UUID, status LeadStatus) (*LeadsModel, error)
 }

@@ -54,3 +54,16 @@ func (s *LeadService) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain.Le
 
 	return lead, nil
 }
+
+func (s *LeadService) UpdateLeadStatus(ctx context.Context, id uuid.UUID, status domain.LeadStatus) (*domain.LeadsModel, error) {
+	if !status.IsValid() {
+		return nil, fmt.Errorf("leads_service: update_lead_status: status: %q: %w", status, domain.ErrInvalidData)
+	}
+
+	lead, err := s.repo.UpdateLeadStatus(ctx, id, status)
+	if err != nil {
+		return nil, fmt.Errorf("leads_service: update_lead_status: %w", err)
+	}
+
+	return lead, nil
+}

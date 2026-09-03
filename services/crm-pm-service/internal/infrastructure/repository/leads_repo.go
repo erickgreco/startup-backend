@@ -164,3 +164,42 @@ func (r *LeadRepository) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain
 
 	return &lead, nil
 }
+
+func (r *LeadRepository) UpdateLeadStatus(ctx context.Context, id uuid.UUID, status domain.LeadStatus) (*domain.LeadsModel, error) {
+	var lead domain.LeadsModel
+
+	query := `
+		UPDATE leads
+		SET status = $1
+		WHERE id = $2
+		RETURNING id, name, email, message, status, source, created_at, updated_at
+	`
+
+	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
+	defer cancel()
+
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		status,
+		id,
+	).Scan(
+		&lead.ID,
+		&lead.Name,
+		&lead.Email,
+		&lead.Message,
+		&lead.Status,
+		&lead.Source,
+		&lead.CreatedAt,
+		&lead.UpdatedAt,
+	)
+	if err != nil {
+		mappedErr := mapReadError(err)
+		if errors.Is(mappedErr, ErrNotFound) {
+			return nil, domain.ErrNotFound
+		}
+		return nil, fmt.Errorf("leads_repo: update_lead_status: %w", translateWriteError(err))
+	}
+
+	return &lead, nil
+}

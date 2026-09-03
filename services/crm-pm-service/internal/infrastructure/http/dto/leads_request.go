@@ -15,3 +15,7 @@ func (r CreateLeadRequest) ToDomain() *domain.LeadsModel {
 		Message: r.Message,
 	}
 }
+
+type UpdateLeadStatusRequest struct {
+	Status string `json:"status" binding:"required,oneof=new quoted converted lost merged"`
+}

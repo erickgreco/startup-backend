@@ -1,0 +1,22 @@
+info:
+  name: leads-updateStatus
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseURL}}/leads/6ed564b0-1553-4c76-b8e0-63e587ab8f8f/status"
+  body:
+    type: json
+    data: |-
+      {
+        "status": "converted"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
