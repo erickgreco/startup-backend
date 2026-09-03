@@ -34,6 +34,6 @@ func registerLeadsRoutes(rg *gin.RouterGroup, h *handler.LeadsHandler) {
 		leads.GET("", h.GetByStatus)
 		leads.GET("/:id", h.GetByID)
 		leads.PATCH("/:id/status", h.UpdateStatus)
-		// leads.DELETE("/:id", h.Delete)
+		leads.DELETE("/:id", h.Delete)
 	}
 }

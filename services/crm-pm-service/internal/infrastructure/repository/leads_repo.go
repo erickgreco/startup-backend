@@ -203,3 +203,28 @@ func (r *LeadRepository) UpdateLeadStatus(ctx context.Context, id uuid.UUID, sta
 
 	return &lead, nil
 }
+
+func (r *LeadRepository) DeleteLead(ctx context.Context, id uuid.UUID) error {
+	query := `
+		DELETE FROM leads
+		WHERE id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
+	defer cancel()
+
+	tag, err := r.pool.Exec(
+		ctx,
+		query,
+		id,
+	)
+	if err != nil {
+		return fmt.Errorf("leads_repo: delete_lead: %w", translateWriteError(err))
+	}
+
+	if tag.RowsAffected() == 0 {
+		return domain.ErrNotFound
+	}
+
+	return nil
+}

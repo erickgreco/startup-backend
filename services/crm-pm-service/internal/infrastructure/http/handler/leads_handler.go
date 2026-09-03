@@ -100,3 +100,19 @@ func (h *LeadsHandler) UpdateStatus(c *gin.Context) {
 
 	response.Ok(c, dto.FromLeadDomain(lead))
 }
+
+func (h *LeadsHandler) Delete(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		response.BadRequest(c, ErrInvalidLeadID)
+		return
+	}
+
+	if err := h.service.DeleteLead(c.Request.Context(), id); err != nil {
+		mapDomainError(c, "failed_to_delete_lead", err)
+		return
+	}
+
+	response.NoContent(c)
+}

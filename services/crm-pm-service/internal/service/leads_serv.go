@@ -67,3 +67,11 @@ func (s *LeadService) UpdateLeadStatus(ctx context.Context, id uuid.UUID, status
 
 	return lead, nil
 }
+
+func (s *LeadService) DeleteLead(ctx context.Context, id uuid.UUID) error {
+	if err := s.repo.DeleteLead(ctx, id); err != nil {
+		return fmt.Errorf("leads_service: delete_lead: %w", err)
+	}
+
+	return nil
+}

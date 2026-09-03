@@ -60,6 +60,7 @@ type LeadRepository interface {
 	GetLeadsByStatus(ctx context.Context, status LeadStatus) ([]*LeadsModel, error)
 	GetLeadByID(ctx context.Context, id uuid.UUID) (*LeadsModel, error)
 	UpdateLeadStatus(ctx context.Context, id uuid.UUID, status LeadStatus) (*LeadsModel, error)
+	DeleteLead(ctx context.Context, id uuid.UUID) error
 }
 
 type LeadService interface {
@@ -67,4 +68,5 @@ type LeadService interface {
 	GetLeadsByStatus(ctx context.Context, status LeadStatus) ([]*LeadsModel, error)
 	GetLeadByID(ctx context.Context, id uuid.UUID) (*LeadsModel, error)
 	UpdateLeadStatus(ctx context.Context, id uuid.UUID, status LeadStatus) (*LeadsModel, error)
+	DeleteLead(ctx context.Context, id uuid.UUID) error
 }

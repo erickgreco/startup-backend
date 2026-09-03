@@ -50,3 +50,9 @@ func Created(c *gin.Context, data any) {
 func Ok(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, Response{Data: data})
 }
+
+// ** La especificacion HTTP indica que un servidor que responde 204
+// ** no debe incluir un body en absoluto
+func NoContent(c *gin.Context) {
+	c.Status(http.StatusNoContent)
+}
