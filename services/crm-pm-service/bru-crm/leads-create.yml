@@ -10,9 +10,10 @@ http:
     type: json
     data: |-
       {
-        "name": "Erick",
-        "email": "email3@email.com",
-        "message": "first test"
+        "name": "Carlos Mendez",
+        "email": "carlos@techstartup.mx",
+        "message": "Hola, necesitamos urgentemente un website de ecommerce para nuestra tienda de ropa. Tenemos un presupuesto de $8000 USD y requerimos que esté listo en 2 meses máximo.\n\nRequisitos específicos:\n- Diseño responsive para mobile\n- Integración con PayPal y Stripe\n- Catálogo de productos con 500+ items\n- Sistema de inventario\n- Reportes de ventas básicos\n\nActualmente tenemos 2000 clientes mensuales y esperamos crecer a 5000. El servidor actual no aguanta la carga.\n\n¿Puedes hacerlo? ¿Cuál sería tu presupuesto y timeline?",
+        "source": "landing_page"
       }
   auth: inherit
 

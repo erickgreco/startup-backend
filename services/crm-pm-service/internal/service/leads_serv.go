@@ -5,16 +5,19 @@ import (
 	"fmt"
 
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
+	"github.com/erickgreco/startup-backend/shared/logger"
 	"github.com/google/uuid"
 )
 
 type LeadService struct {
-	repo domain.LeadRepository
+	repo     domain.LeadRepository
+	analyzer *LocalLeadAnalyzer
 }
 
 func NewLeadService(repo domain.LeadRepository) *LeadService {
 	return &LeadService{
-		repo: repo,
+		repo:     repo,
+		analyzer: NewLocalLeadAnalyzer(),
 	}
 }
 
@@ -27,8 +30,14 @@ func (s *LeadService) CreateLead(ctx context.Context, lead *domain.LeadsModel) e
 		return fmt.Errorf("leads_service: create_lead: %w", domain.ErrMissingRequiredFields)
 	}
 
+	analysis := s.analyzer.Analyze(lead.Message)
+
+	logger.Info("lead_analysis", "score:", analysis.Score, "quality:", analysis.QA, "concepts:", analysis.FoundConcepts)
+
 	lead.ID = uuid.New()
 	lead.Status = domain.LeadStatusNew
+	lead.DataQuality = analysis.QA
+	lead.QualityScore = analysis.Score
 
 	if err := s.repo.CreateLead(ctx, lead); err != nil {
 		return fmt.Errorf("leads_service: created_lead: %w", err)

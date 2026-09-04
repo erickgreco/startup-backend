@@ -28,10 +28,10 @@ func NewLeadRepository(pool *pgxpool.Pool) *LeadRepository {
 func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel) error {
 	query := `
 		INSERT INTO leads (
-			id, name, email, message, status, source
+			id, name, email, message, data_quality, quality_score, status, source
 		)
 		VALUES (
-			$1, $2, $3, $4, $5, $6
+			$1, $2, $3, $4, $5, $6, $7, $8
 		)
 		RETURNING created_at, updated_at
 	`
@@ -46,6 +46,8 @@ func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel
 		lead.Name,
 		lead.Email,
 		lead.Message,
+		lead.DataQuality,
+		lead.QualityScore,
 		lead.Status,
 		lead.Source,
 	).Scan(

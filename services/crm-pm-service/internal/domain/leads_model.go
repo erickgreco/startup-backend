@@ -7,6 +7,35 @@ import (
 	"github.com/google/uuid"
 )
 
+type LeadsModel struct {
+	ID           uuid.UUID
+	Name         string
+	Email        string
+	Message      string
+	DataQuality  Quality
+	QualityScore float64    // 0-100
+	Status       LeadStatus //** new, quoted, converted, lost,	merged-en caso que exista un duplicado de cotizacion
+	Source       LeadSource
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type Quality string
+
+const (
+	High   Quality = "high"   //** Info clara, scope definido
+	Medium Quality = "medium" //** Mas del 50%, aun con dudas
+	Low    Quality = "low"    //** Falta contexto
+)
+
+// ** Breakdown de analisis
+type QualityAnalisis struct {
+	Score         float64
+	QA            Quality
+	Indicators    map[string]float64 //** Debug info
+	FoundConcepts []string           // ** Conceptos detectados
+}
+
 type LeadStatus string
 
 const (
@@ -16,17 +45,6 @@ const (
 	LeadStatusLost      LeadStatus = "lost"
 	LeadStatusMerged    LeadStatus = "merged"
 )
-
-type LeadsModel struct {
-	ID        uuid.UUID
-	Name      string
-	Email     string
-	Message   string
-	Status    LeadStatus //? new, quoted, converted, lost,	merged-en caso que exista un duplicado de cotizacion
-	Source    LeadSource
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
 
 type LeadSource string
 

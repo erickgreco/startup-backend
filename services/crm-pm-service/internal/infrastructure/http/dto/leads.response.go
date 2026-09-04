@@ -8,26 +8,30 @@ import (
 )
 
 type LeadResponse struct {
-	ID        uuid.UUID         `json:"id"`
-	Name      string            `json:"name"`
-	Email     string            `json:"email"`
-	Message   string            `json:"message"`
-	Status    domain.LeadStatus `json:"status"`
-	Source    domain.LeadSource `json:"source"`
-	CreatedAt time.Time         `json:"created_at"`
-	UpdatedAt time.Time         `json:"updated_at"`
+	ID           uuid.UUID         `json:"id"`
+	Name         string            `json:"name"`
+	Email        string            `json:"email"`
+	Message      string            `json:"message"`
+	DataQuality  domain.Quality    `json:"data_quality"`
+	QualityScore float64           `json:"quality_score"`
+	Status       domain.LeadStatus `json:"status"`
+	Source       domain.LeadSource `json:"source"`
+	CreatedAt    time.Time         `json:"created_at"`
+	UpdatedAt    time.Time         `json:"updated_at"`
 }
 
 func FromLeadDomain(l *domain.LeadsModel) LeadResponse {
 	return LeadResponse{
-		ID:        l.ID,
-		Name:      l.Name,
-		Email:     l.Email,
-		Message:   l.Message,
-		Status:    l.Status,
-		Source:    l.Source,
-		CreatedAt: l.CreatedAt,
-		UpdatedAt: l.UpdatedAt,
+		ID:           l.ID,
+		Name:         l.Name,
+		Email:        l.Email,
+		Message:      l.Message,
+		DataQuality:  l.DataQuality,
+		QualityScore: l.QualityScore,
+		Status:       l.Status,
+		Source:       l.Source,
+		CreatedAt:    l.CreatedAt,
+		UpdatedAt:    l.UpdatedAt,
 	}
 }
 
