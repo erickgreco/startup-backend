@@ -6,7 +6,7 @@ import (
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/infrastructure/http/handler"
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/infrastructure/http/router"
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/infrastructure/repository"
-	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/service"
+	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/service/leadserv"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -45,7 +45,7 @@ func New(db *pgxpool.Pool, cfg *config.Config) *Server {
 // abstracciones, no de implementaciones (Dependency Inversion)
 func (s *Server) buildHandlers() *router.Handlers {
 	var leadsRepo domain.LeadRepository = repository.NewLeadRepository(s.db)
-	var leadsSrv domain.LeadService = service.NewLeadService(leadsRepo)
+	var leadsSrv domain.LeadService = leadserv.NewLeadService(leadsRepo)
 	leadsHandler := handler.NewLeadsHandler(leadsSrv)
 
 	return &router.Handlers{

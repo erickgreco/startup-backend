@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TODO: cambiar forma en que trabajan los errores (sensitive data)
 var (
 	ErrInvalidReqBody     = errors.New("invalid_request_body")
 	ErrValidationFailed   = errors.New("validation_failed")

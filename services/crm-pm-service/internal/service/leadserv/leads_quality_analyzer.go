@@ -1,4 +1,4 @@
-package service
+package leadserv
 
 import (
 	"encoding/json"
