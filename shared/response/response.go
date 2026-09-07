@@ -4,26 +4,44 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/erickgreco/startup-backend/shared/contracts"
 	"github.com/gin-gonic/gin"
 )
 
-type Response struct {
-	Message string `json:"message,omitempty"`
-	Error   string `json:"error,omitempty"`
-	Data    any    `json:"data,omitempty"`
-}
+type Response = contracts.APIResponse
+type APIError = contracts.APIError
 
 // Creado para no filtrar errores especificos
 var (
 	errInternal = errors.New("internal_server_error")
 )
 
+func httpStatusToCode(status int) string {
+	switch status {
+	case http.StatusBadRequest:
+		return "bad_request"
+	case http.StatusConflict:
+		return "conflict"
+	case http.StatusNotFound:
+		return "not_found"
+	case http.StatusGatewayTimeout:
+		return "gateway_timeout"
+	case http.StatusInternalServerError:
+		return "internal_server_error"
+	default:
+		return "unknown_error"
+	}
+}
+
 func Error(c *gin.Context, status int, err error) {
-	c.JSON(status, Response{Error: err.Error()})
+	c.JSON(status, Response{Error: &APIError{
+		Code:    httpStatusToCode(status),
+		Message: err.Error(),
+	}})
 }
 
 func BadRequest(c *gin.Context, err error) {
-	Error(c, http.StatusConflict, err)
+	Error(c, http.StatusBadRequest, err)
 }
 
 // ! No recibe error para evitar filtrar detalles internos
