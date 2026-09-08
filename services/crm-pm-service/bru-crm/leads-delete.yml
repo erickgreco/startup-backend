@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: "{{baseURL}}/leads/bdea2824-36ee-463e-a4a0-8b930bc0e56d"
+  url: "{{baseURL}}/leads/{{lead_id}}"
   auth: inherit
 
 settings:

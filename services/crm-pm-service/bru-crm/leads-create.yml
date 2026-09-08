@@ -11,11 +11,27 @@ http:
     data: |-
       {
         "name": "Carlos Mendez",
+        "business_name": "Pizzeria Gusano",
+        "phone_number": "+52 55-12-34-56-78",
         "email": "carlos2@techstartup.mx",
-        "message": "Hola, necesitamos urgentemente un website de ecommerce para nuestra tienda de ropa. Tenemos un presupuesto de $8000 USD y requerimos que esté listo en 2 meses máximo.\n\nRequisitos específicos:\n- Diseño responsive para mobile\n- Integración con PayPal y Stripe\n- Catálogo de productos con 500+ items\n- Sistema de inventario\n- Reportes de ventas básicos\n\nActualmente tenemos 2000 clientes mensuales y esperamos crecer a 5000. El servidor actual no aguanta la carga.\n\n¿Puedes hacerlo? ¿Cuál sería tu presupuesto y timeline?",
-        "source": "landing_page"
+        "message": "Hola, necesitamos urgentemente un website de ecommerce para nuestra tienda de ropa. Tenemos un presupuesto de $8000 USD y requerimos que esté listo en 2 meses máximo.\n\nRequisitos específicos:\n- Diseño responsive para mobile\n- Integración con PayPal y Stripe\n- Catálogo de productos con 500+ items\n- Sistema de inventario\n- Reportes de ventas básicos\n\nActualmente tenemos 2000 clientes mensuales y esperamos crecer a 5000. El servidor actual no aguanta la carga.\n\n¿Puedes hacerlo? ¿Cuál sería tu presupuesto y timeline?"
       }
   auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const response = res.getBody();
+        const leadId = response.data?.id;
+
+        if (!leadId) {
+          console.error("No se encontro el ID en la respuesta");
+          return;
+        }
+
+        bru.setEnvVar("lead_id", leadId);
+        console.log("lead_id guardado: ", leadId);
 
 settings:
   encodeUrl: true
