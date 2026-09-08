@@ -26,6 +26,9 @@ db-up:
 db-down: 
 	docker compose -f $(COMPOSE_FILE) down
 
+db-down-vol:
+	docker compose -f $(COMPOSE_FILE) down -v
+
 db-logs: 
 	docker compose -f $(COMPOSE_FILE) logs -f
 
