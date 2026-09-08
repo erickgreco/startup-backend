@@ -7,9 +7,20 @@ import (
 	"github.com/google/uuid"
 )
 
+type LeadRequest struct {
+	Name         string
+	BusinessName string
+	PhoneNumber  string
+	Email        string
+	Message      string
+	Source       LeadSource
+}
+
 type LeadsModel struct {
 	ID           uuid.UUID
 	Name         string
+	BusinessName string
+	PhoneNumber  string
 	Email        string
 	Message      string
 	DataQuality  Quality
@@ -74,7 +85,7 @@ func (s LeadStatus) IsValid() bool {
 }
 
 type LeadRepository interface {
-	CreateLead(ctx context.Context, lead *LeadsModel) error
+	CreateLead(ctx context.Context, lead *LeadsModel) (*LeadsModel, error)
 	GetLeadsByStatus(ctx context.Context, status LeadStatus) ([]*LeadsModel, error)
 	GetLeadByID(ctx context.Context, id uuid.UUID) (*LeadsModel, error)
 	UpdateLeadStatus(ctx context.Context, id uuid.UUID, status LeadStatus) (*LeadsModel, error)
@@ -82,7 +93,7 @@ type LeadRepository interface {
 }
 
 type LeadService interface {
-	CreateLead(ctx context.Context, lead *LeadsModel) error
+	CreateLead(ctx context.Context, req *LeadRequest) (*LeadsModel, error)
 	GetLeadsByStatus(ctx context.Context, status LeadStatus) ([]*LeadsModel, error)
 	GetLeadByID(ctx context.Context, id uuid.UUID) (*LeadsModel, error)
 	UpdateLeadStatus(ctx context.Context, id uuid.UUID, status LeadStatus) (*LeadsModel, error)

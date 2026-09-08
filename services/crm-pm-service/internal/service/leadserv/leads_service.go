@@ -21,29 +21,38 @@ func NewLeadService(repo domain.LeadRepository) *LeadService {
 	}
 }
 
-func (s *LeadService) CreateLead(ctx context.Context, lead *domain.LeadsModel) error {
-	if !lead.Source.IsValid() {
-		return fmt.Errorf("leads_service: create_lead: source %q: %w", lead.Source, domain.ErrInvalidSource)
+func (s *LeadService) CreateLead(ctx context.Context, req *domain.LeadRequest) (*domain.LeadsModel, error) {
+	if !req.Source.IsValid() {
+		return nil, fmt.Errorf("leads_service: create_lead: source %q: %w", req.Source, domain.ErrInvalidSource)
 	}
 
-	if lead.Name == "" || lead.Email == "" {
-		return fmt.Errorf("leads_service: create_lead: %w", domain.ErrMissingRequiredFields)
+	if req.Name == "" || req.Email == "" {
+		return nil, fmt.Errorf("leads_service: create_lead: %w", domain.ErrMissingRequiredFields)
 	}
 
-	analysis := s.analyzer.Analyze(lead.Message)
+	analysis := s.analyzer.Analyze(req.Message)
 
 	logger.Info("lead_analysis", "score:", analysis.Score, "quality:", analysis.QA, "concepts:", analysis.FoundConcepts)
 
-	lead.ID = uuid.New()
-	lead.Status = domain.LeadStatusNew
-	lead.DataQuality = analysis.QA
-	lead.QualityScore = analysis.Score
-
-	if err := s.repo.CreateLead(ctx, lead); err != nil {
-		return fmt.Errorf("leads_service: created_lead: %w", err)
+	model := &domain.LeadsModel{
+		ID:           uuid.New(),
+		Name:         req.Name,
+		BusinessName: req.BusinessName,
+		PhoneNumber:  req.PhoneNumber,
+		Email:        req.Email,
+		Message:      req.Message,
+		DataQuality:  analysis.QA,
+		QualityScore: analysis.Score,
+		Status:       domain.LeadStatusNew,
+		Source:       req.Source,
 	}
 
-	return nil
+	lead, err := s.repo.CreateLead(ctx, model)
+	if err != nil {
+		return nil, fmt.Errorf("leads_service: create_lead: %w", err)
+	}
+
+	return lead, nil
 }
 
 func (s *LeadService) GetLeadsByStatus(ctx context.Context, status domain.LeadStatus) ([]*domain.LeadsModel, error) {

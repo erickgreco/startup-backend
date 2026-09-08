@@ -29,10 +29,11 @@ func (h *LeadsHandler) Create(c *gin.Context) {
 		return
 	}
 
-	lead := req.ToDomain()
-	lead.Source = domain.LeadSrcManual
+	leadReq := req.ToDomain()
+	leadReq.Source = domain.LeadSrcManual
 
-	if err := h.service.CreateLead(c.Request.Context(), lead); err != nil {
+	lead, err := h.service.CreateLead(c.Request.Context(), leadReq)
+	if err != nil {
 		mapDomainError(c, "failed_to_create_lead", err)
 		return
 	}

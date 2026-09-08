@@ -25,15 +25,17 @@ func NewLeadRepository(pool *pgxpool.Pool) *LeadRepository {
 	}
 }
 
-func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel) error {
+func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel) (*domain.LeadsModel, error) {
+	var createdLead domain.LeadsModel
+
 	query := `
 		INSERT INTO leads (
-			id, name, email, message, data_quality, quality_score, status, source
+			id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source
 		)
 		VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 		)
-		RETURNING created_at, updated_at
+		RETURNING id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
@@ -44,6 +46,8 @@ func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel
 		query,
 		lead.ID,
 		lead.Name,
+		lead.BusinessName,
+		lead.PhoneNumber,
 		lead.Email,
 		lead.Message,
 		lead.DataQuality,
@@ -51,14 +55,24 @@ func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel
 		lead.Status,
 		lead.Source,
 	).Scan(
-		&lead.CreatedAt,
-		&lead.UpdatedAt,
+		&createdLead.ID,
+		&createdLead.Name,
+		&createdLead.BusinessName,
+		&createdLead.PhoneNumber,
+		&createdLead.Email,
+		&createdLead.Message,
+		&createdLead.DataQuality,
+		&createdLead.QualityScore,
+		&createdLead.Status,
+		&createdLead.Source,
+		&createdLead.CreatedAt,
+		&createdLead.UpdatedAt,
 	)
 	if err != nil {
-		return fmt.Errorf("leads_repo: create_lead: %w", translateWriteError(err))
+		return nil, fmt.Errorf("leads_repo: create_lead: %w", translateWriteError(err))
 	}
 
-	return nil
+	return &createdLead, nil
 }
 
 // ** Es especifico de leads: traduce el error generico de infraestructura a un error
@@ -81,7 +95,7 @@ func translateWriteError(err error) error {
 
 func (r *LeadRepository) GetLeadsByStatus(ctx context.Context, status domain.LeadStatus) ([]*domain.LeadsModel, error) {
 	query := `
-		SELECT id, name, email, message, status, source, created_at, updated_at
+		SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
 		FROM leads
 		WHERE status = $1
 		ORDER BY created_at DESC
@@ -107,8 +121,12 @@ func (r *LeadRepository) GetLeadsByStatus(ctx context.Context, status domain.Lea
 		if err := rows.Scan(
 			&lead.ID,
 			&lead.Name,
+			&lead.BusinessName,
+			&lead.PhoneNumber,
 			&lead.Email,
 			&lead.Message,
+			&lead.DataQuality,
+			&lead.QualityScore,
 			&lead.Status,
 			&lead.Source,
 			&lead.CreatedAt,
@@ -134,7 +152,7 @@ func (r *LeadRepository) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain
 	var lead domain.LeadsModel
 
 	query := `
-		SELECT id, name, email, message, status, source, created_at, updated_at
+		SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
 		FROM leads
 		WHERE id = $1
 	`
@@ -149,8 +167,12 @@ func (r *LeadRepository) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain
 	).Scan(
 		&lead.ID,
 		&lead.Name,
+		&lead.BusinessName,
+		&lead.PhoneNumber,
 		&lead.Email,
 		&lead.Message,
+		&lead.DataQuality,
+		&lead.QualityScore,
 		&lead.Status,
 		&lead.Source,
 		&lead.CreatedAt,
@@ -174,7 +196,7 @@ func (r *LeadRepository) UpdateLeadStatus(ctx context.Context, id uuid.UUID, sta
 		UPDATE leads
 		SET status = $1
 		WHERE id = $2
-		RETURNING id, name, email, message, status, source, created_at, updated_at
+		RETURNING id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
@@ -188,8 +210,12 @@ func (r *LeadRepository) UpdateLeadStatus(ctx context.Context, id uuid.UUID, sta
 	).Scan(
 		&lead.ID,
 		&lead.Name,
+		&lead.BusinessName,
+		&lead.PhoneNumber,
 		&lead.Email,
 		&lead.Message,
+		&lead.DataQuality,
+		&lead.QualityScore,
 		&lead.Status,
 		&lead.Source,
 		&lead.CreatedAt,
