@@ -7,9 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type LeadResponse struct {
+type LeadResponseUser struct {
 	ID           uuid.UUID         `json:"id"`
 	Name         string            `json:"name"`
+	BusinessName string            `json:"business_name"`
+	PhoneNumber  string            `json:"phone_number"`
 	Email        string            `json:"email"`
 	Message      string            `json:"message"`
 	DataQuality  domain.Quality    `json:"data_quality"`
@@ -20,10 +22,32 @@ type LeadResponse struct {
 	UpdatedAt    time.Time         `json:"updated_at"`
 }
 
-func FromLeadDomain(l *domain.LeadsModel) LeadResponse {
-	return LeadResponse{
+type LeadResponseClient struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	BusinessName string    `json:"business_name"`
+	PhoneNumber  string    `json:"phone_number"`
+	Email        string    `json:"email"`
+	Message      string    `json:"message"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+func FromLeadDomain(l *domain.LeadsModel) any {
+	switch l.Source {
+	case domain.LeadSrcManual:
+		return toLeadResponseUser(l)
+	default:
+		return toLeadResponseClient(l)
+	}
+}
+
+func toLeadResponseUser(l *domain.LeadsModel) LeadResponseUser {
+	return LeadResponseUser{
 		ID:           l.ID,
 		Name:         l.Name,
+		BusinessName: l.BusinessName,
+		PhoneNumber:  l.PhoneNumber,
 		Email:        l.Email,
 		Message:      l.Message,
 		DataQuality:  l.DataQuality,
@@ -35,8 +59,21 @@ func FromLeadDomain(l *domain.LeadsModel) LeadResponse {
 	}
 }
 
-func FromLeadDomainList(ls []*domain.LeadsModel) []LeadResponse {
-	res := make([]LeadResponse, 0, len(ls))
+func toLeadResponseClient(l *domain.LeadsModel) LeadResponseClient {
+	return LeadResponseClient{
+		ID:           l.ID,
+		Name:         l.Name,
+		BusinessName: l.BusinessName,
+		PhoneNumber:  l.PhoneNumber,
+		Email:        l.Email,
+		Message:      l.Message,
+		CreatedAt:    l.CreatedAt,
+		UpdatedAt:    l.UpdatedAt,
+	}
+}
+
+func FromLeadDomainList(ls []*domain.LeadsModel) []any {
+	res := make([]any, 0, len(ls))
 	for _, l := range ls {
 		res = append(res, FromLeadDomain(l))
 	}
