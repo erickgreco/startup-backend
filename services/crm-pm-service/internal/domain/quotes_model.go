@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
@@ -8,6 +9,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 )
+
+type QuoteRequest struct {
+	ClientName                  string
+	ClientBusiness              *string
+	ClientEmail                 string
+	ClientPhone                 string
+	ProjectTitle                string
+	ProjectDescription          string
+	ProjectEstimatedDurationSec time.Duration
+	Items                       []QuoteItem
+	PaymentMethod               PayMethod
+}
 
 type QuotesModel struct {
 	ID          uuid.UUID
@@ -121,4 +134,8 @@ func (s QuoteStatus) IsValid() bool {
 	default:
 		return false
 	}
+}
+
+type QuoteRepository interface {
+	CreateQuote(ctx context.Context, quote *QuotesModel) (*QuotesModel, error)
 }
