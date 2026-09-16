@@ -19,25 +19,27 @@ func NewQuotesRepository(pool *pgxpool.Pool) *QuoteRepository {
 }
 
 // ** Create asume que solo se esta creando un draft por lo que deja fuera los campos
-// ** sentAt, acceptedAt, rejectedAt
+// ** validUnit, sentAt, acceptedAt, rejectedAt
+// TODO: actualmente la funcion inserta todo en la tabla quotes, ignorando la tabla
+// TODO: quote_items, se debe trabajar con ambas tablas
 func (r *QuoteRepository) CreateQuote(ctx context.Context, quote *domain.QuotesModel) (*domain.QuotesModel, error) {
 	var createdQuote domain.QuotesModel
 
 	query := `
 		INSERT INTO quotes (
 			id, lead_id, quote_number, client_name, client_business, client_email, client_phone,
-			project_title, project_description, project_resume, project_estimated_duration,
-			functionality_example, quote_items, payment_method, status, created_at, valid_until,
-			subtotal_cents, total_cents, currency, notes
+			project_title, project_description, project_estimated_duration_days,
+			quote_items, payment_method, status, created_at, subtotal, total, 
+			currency, notes
 		)
 		VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-			$17, $18, $19, $20, $21
+			$17, $18
 		)
 		RETURNING id, lead_id, quote_number, client_name, client_business, client_email, client_phone,
-			project_title, project_description, project_resume, project_estimated_duration,
-			functionality_example, quote_items, payment_method, status, created_at, valid_until,
-			subtotal_cents, total_cents, currency, notes, updated_at
+			project_title, project_description, project_estimated_duration_days,
+			quote_items, payment_method, status, created_at, subtotal, total, 
+			currency, notes, updated_at
 	`
 
 	itemstoJSON, err := quote.SetItemsToJSON()
@@ -60,14 +62,11 @@ func (r *QuoteRepository) CreateQuote(ctx context.Context, quote *domain.QuotesM
 		quote.ClientPhone,
 		quote.ProjectTitle,
 		quote.ProjectDescription,
-		quote.ProjectResume,
-		quote.ProjectEstimatedDurationSec,
-		quote.FunctionalityExample,
+		quote.ProjectEstimatedDurationDays,
 		itemstoJSON,
 		quote.PaymentMethod,
 		quote.Status,
 		quote.CreatedAt,
-		quote.ValidUntil,
 		quote.Subtotal,
 		quote.Total,
 		quote.Currency,
@@ -86,14 +85,11 @@ func (r *QuoteRepository) CreateQuote(ctx context.Context, quote *domain.QuotesM
 		&createdQuote.ClientPhone,
 		&createdQuote.ProjectTitle,
 		&createdQuote.ProjectDescription,
-		&createdQuote.ProjectResume,
-		&createdQuote.ProjectEstimatedDurationSec,
-		&createdQuote.FunctionalityExample,
+		&createdQuote.ProjectEstimatedDurationDays,
 		&JSONToItems,
 		&createdQuote.PaymentMethod,
 		&createdQuote.Status,
 		&createdQuote.CreatedAt,
-		&createdQuote.ValidUntil,
 		&createdQuote.Subtotal,
 		&createdQuote.Total,
 		&createdQuote.Currency,
@@ -104,7 +100,7 @@ func (r *QuoteRepository) CreateQuote(ctx context.Context, quote *domain.QuotesM
 		return nil, fmt.Errorf("quotes_repo: create_quote: %w", err)
 	}
 
-	if err := quote.SetItemsFromJSON(JSONToItems); err != nil {
+	if err := createdQuote.SetItemsFromJSON(JSONToItems); err != nil {
 		return nil, fmt.Errorf("quotes_repo: create_quote: failed_to_deserialize_items: %w", err)
 	}
 

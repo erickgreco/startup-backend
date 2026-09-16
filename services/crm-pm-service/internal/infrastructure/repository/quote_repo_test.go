@@ -158,6 +158,7 @@ func TestCreateQuote(t *testing.T) {
 	}
 }
 
+// TODO: refactor test con modelo actual de repo.CreateQuote()
 func TestCreateQuote_TableDriven(t *testing.T) {
 	pool, cleanUp := setupTestDB(t)
 	defer cleanUp()
@@ -184,7 +185,6 @@ func TestCreateQuote_TableDriven(t *testing.T) {
 				PaymentMethod:      "upfront",
 				Status:             "draft",
 				CreatedAt:          time.Now(),
-				ValidUntil:         time.Now().AddDate(0, 0, 30),
 				Subtotal:           decimal.NewFromInt(500000),
 				Total:              decimal.NewFromInt(500000),
 				Currency:           currency.MXN,
@@ -204,7 +204,6 @@ func TestCreateQuote_TableDriven(t *testing.T) {
 				PaymentMethod:      "split",
 				Status:             "draft",
 				CreatedAt:          time.Now(),
-				ValidUntil:         time.Now().AddDate(0, 0, 30),
 				Subtotal:           decimal.NewFromInt(200000),
 				Total:              decimal.NewFromInt(200000),
 				Currency:           currency.MXN,
@@ -225,7 +224,6 @@ func TestCreateQuote_TableDriven(t *testing.T) {
 				PaymentMethod:      "upfront",
 				Status:             "draft",
 				CreatedAt:          time.Now(),
-				ValidUntil:         time.Now().Add(-24 * time.Hour), // ← Antes de issued_at
 				Subtotal:           decimal.NewFromInt(100000),
 				Total:              decimal.NewFromInt(100000),
 				Currency:           currency.MXN,

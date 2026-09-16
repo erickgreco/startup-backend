@@ -14,4 +14,6 @@ var (
 	ErrNotFound              = errors.New("data_not_found")
 	ErrMissingItems          = errors.New("quote_requires_at_least_one_item")
 	ErrPaymethodRequired     = errors.New("payment_method_is_required")
+	ErrInvalidQuoteItem      = errors.New("invalid_quote_item")
+	ErrInvalidDuration       = errors.New("invalid_duration_days")
 )

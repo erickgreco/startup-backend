@@ -11,15 +11,17 @@ import (
 )
 
 type QuoteRequest struct {
-	ClientName                  string
-	ClientBusiness              *string
-	ClientEmail                 string
-	ClientPhone                 string
-	ProjectTitle                string
-	ProjectDescription          string
-	ProjectEstimatedDurationSec time.Duration
-	Items                       []QuoteItem
-	PaymentMethod               PayMethod
+	ClientName                   string
+	ClientBusiness               *string
+	ClientEmail                  string
+	ClientPhone                  string
+	ProjectTitle                 string
+	ProjectDescription           string
+	ProjectEstimatedDurationDays int
+	Items                        []ItemRequest
+	PaymentMethod                PayMethod
+	Currency                     currency.Type
+	Notes                        *string
 }
 
 type QuotesModel struct {
@@ -34,10 +36,10 @@ type QuotesModel struct {
 	ClientPhone    string
 
 	// Project data
-	ProjectTitle                string
-	ProjectDescription          string
-	ProjectResume               *string
-	ProjectEstimatedDurationSec time.Duration
+	ProjectTitle                 string
+	ProjectDescription           string
+	ProjectResume                *string
+	ProjectEstimatedDurationDays int
 
 	// Detalles de la oferta
 	FunctionalityExample *string
@@ -47,7 +49,7 @@ type QuotesModel struct {
 	// Estados y fechas
 	Status     QuoteStatus
 	CreatedAt  time.Time
-	ValidUntil time.Time // ** cuenta a partir de cuando se envia
+	ValidUntil *time.Time // ** cuenta a partir de cuando se envia
 	SentAt     *time.Time
 	AcceptedAt *time.Time
 	RejectedAt *time.Time
@@ -119,7 +121,7 @@ func (p PayMethod) IsValid() bool {
 type QuoteStatus string
 
 const (
-	QuoteStatusDraft     QuoteStatus = "new"
+	QuoteStatusDraft     QuoteStatus = "draft"
 	QuoteStatusSent      QuoteStatus = "sent"
 	QuoteStatusAccepted  QuoteStatus = "accepted"
 	QuoteStatusRejected  QuoteStatus = "rejected"
@@ -138,4 +140,8 @@ func (s QuoteStatus) IsValid() bool {
 
 type QuoteRepository interface {
 	CreateQuote(ctx context.Context, quote *QuotesModel) (*QuotesModel, error)
+}
+
+type QuoteService interface {
+	CreateQuote(ctx context.Context, leadID uuid.UUID, req *QuoteRequest) (*QuotesModel, error)
 }

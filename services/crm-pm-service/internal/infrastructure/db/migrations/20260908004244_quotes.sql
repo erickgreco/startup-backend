@@ -1,45 +1,45 @@
 -- +goose Up
 CREATE TABLE quotes(
-    id                          UUID PRIMARY KEY,
-    lead_id                     UUID NOT NULL REFERENCES leads(id) ON DELETE RESTRICT,
-    quote_number                VARCHAR(50) NOT NULL UNIQUE,
+    id                              UUID PRIMARY KEY,
+    lead_id                         UUID NOT NULL REFERENCES leads(id) ON DELETE RESTRICT,
+    quote_number                    VARCHAR(50) NOT NULL UNIQUE,
 
-    client_name                 VARCHAR(255) NOT NULL,
-    client_business             VARCHAR(255),
-    client_email                VARCHAR(255) NOT NULL,
-    client_phone                VARCHAR(20) NOT NULL,
+    client_name                     VARCHAR(255) NOT NULL,
+    client_business                 VARCHAR(255),
+    client_email                    VARCHAR(255) NOT NULL,
+    client_phone                    VARCHAR(20) NOT NULL,
 
     -- Informacion del proyecto
-    project_title               VARCHAR(500) NOT NULL,
-    project_description         TEXT NOT NULL,
-    project_resume              TEXT,
-    project_estimated_duration  INTERVAL,
+    project_title                   VARCHAR(500) NOT NULL,
+    project_description             TEXT NOT NULL,
+    project_resume                  TEXT,
+    project_estimated_duration_days BIGINT,
 
     -- Detalles de la oferta
-    functionality_example       TEXT,
-    quote_items                 JSONB, -- quote_items
-    payment_method              VARCHAR(50) NOT NULL
-                                CHECK (payment_method IN ('upfront', 'milestone', 'upon_delivery', 'split')),
+    functionality_example           TEXT,
+    quote_items                     JSONB, -- quote_items
+    payment_method                  VARCHAR(50) NOT NULL
+                                    CHECK (payment_method IN ('upfront', 'milestone', 'upon_delivery', 'split')),
 
-    status                      VARCHAR(30) NOT NULL DEFAULT 'draft' 
-                                CHECK (status IN ('draft', 'sent', 'accepted', 'rejected', 'expired', 'converted')),
-    created_at                   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), -- se usa tambien para auditoria
-    valid_until                 TIMESTAMP WITH TIME ZONE,
-    sent_at                     TIMESTAMP WITH TIME ZONE,
-    accepted_at                 TIMESTAMP WITH TIME ZONE,
-    rejected_at                 TIMESTAMP WITH TIME ZONE,
+    status                          VARCHAR(30) NOT NULL DEFAULT 'draft' 
+                                    CHECK (status IN ('draft', 'sent', 'accepted', 'rejected', 'expired', 'converted')),
+    created_at                       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), -- se usa tambien para auditoria
+    valid_until                     TIMESTAMP WITH TIME ZONE,
+    sent_at                         TIMESTAMP WITH TIME ZONE,
+    accepted_at                     TIMESTAMP WITH TIME ZONE,
+    rejected_at                     TIMESTAMP WITH TIME ZONE,
 
-    subtotal_cents              BIGINT NOT NULL CHECK (subtotal_cents >= 0),
-    total_cents                 BIGINT NOT NULL CHECK (total_cents >= 0),
+    subtotal                        BIGINT NOT NULL CHECK (subtotal >= 0),
+    total                           BIGINT NOT NULL CHECK (total >= 0),
 
-    currency                    SMALLINT NOT NULL,
-    notes                       TEXT,
+    currency                        SMALLINT NOT NULL,
+    notes                           TEXT,
 
-    updated_at                  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at                      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
     CONSTRAINT quotes_valid_dates CHECK (valid_until > created_at),
     CONSTRAINT quotes_total_consistency CHECK (
-        total_cents = subtotal_cents
+        total = subtotal
     )
 );
 

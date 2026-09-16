@@ -12,6 +12,7 @@ import (
 type Handlers struct {
 	Health *handler.HealthHandler
 	Leads  *handler.LeadsHandler
+	Quotes *handler.QuotesHandler
 	// Contracts *handler.ContractsHandler	ejemplo
 }
 
@@ -23,17 +24,25 @@ func Setup(r *gin.Engine, h *Handlers) {
 	api := r.Group("api/v1")
 	{
 		registerLeadsRoutes(api, h.Leads)
+		registerQuotesRoutes(api, h.Quotes)
 		// registerContractsRoutes(api, h.Contracts)	ejemplo
 	}
 }
 
-func registerLeadsRoutes(rg *gin.RouterGroup, h *handler.LeadsHandler) {
+func registerLeadsRoutes(rg *gin.RouterGroup, lh *handler.LeadsHandler) {
 	leads := rg.Group("/leads")
 	{
-		leads.POST("", h.Create)
-		leads.GET("", h.GetByStatus)
-		leads.GET("/:id", h.GetByID)
-		leads.PATCH("/:id/status", h.UpdateStatus)
-		leads.DELETE("/:id", h.Delete)
+		leads.POST("", lh.Create)
+		leads.GET("", lh.GetByStatus)
+		leads.GET("/:id", lh.GetByID)
+		leads.PATCH("/:id/status", lh.UpdateStatus)
+		leads.DELETE("/:id", lh.Delete)
+	}
+}
+
+func registerQuotesRoutes(rg *gin.RouterGroup, qh *handler.QuotesHandler) {
+	quotes := rg.Group("/quotes")
+	{
+		quotes.POST("/:leadID", qh.Create)
 	}
 }
