@@ -37,7 +37,20 @@ goose-up:
 	goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" up
 
 goose-down:
-	goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" down
+	@echo "=== Current migration status:" && \
+	goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" status && \
+	printf "\n=== Migrations available to revert TO\n" && \
+	goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" status 2>&1 | grep -E -e '-- [0-9]{14}' | head -n -1 | nl && \
+	read -p "Enter line number to revert TO (empty to cancel): " selection; \
+	if [ -z "$$selection" ]; then \
+		printf "\nCancelled"; exit 0; \
+	fi; \
+	version=$$(goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" status 2>&1 | grep -E -e '-- [0-9]{14}' | head -n -1 | sed -n "$${selection}p" | grep -oE '[0-9]{14}'); \
+	if [ -z "$$version" ]; then \
+		printf "\nInvalid selection"; exit 1; \
+	fi; \
+	printf "\n=== Reverting to version: $$version\n"; \
+	goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" down-to $$version
 
 goose-status:
 	goose -dir $(MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" status
