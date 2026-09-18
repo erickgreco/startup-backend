@@ -4,10 +4,12 @@ import (
 	"time"
 
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
-	"github.com/go-playground/locales/currency"
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
+// ! DTO debe mostrar tipos crudos
+// TODO: cambiar tipos de dominio a string
 type QuoteResponse struct {
 	ID                           uuid.UUID          `json:"id"`
 	LeadID                       uuid.UUID          `json:"lead_id"`
@@ -21,7 +23,7 @@ type QuoteResponse struct {
 	ProjectResume                *string            `json:"project_resume"`
 	ProjectEstimatedDurationDays int                `json:"project_estimated_duration_days"`
 	FunctionalityExample         *string            `json:"functionality_example"`
-	Items                        []domain.QuoteItem `json:"items"`
+	Items                        []ItemResponse     `json:"items"`
 	PaymentMethod                domain.PayMethod   `json:"payment_method"`
 	Status                       domain.QuoteStatus `json:"status"`
 	CreatedAt                    time.Time          `json:"created_at"`
@@ -31,12 +33,46 @@ type QuoteResponse struct {
 	RejectedAt                   *time.Time         `json:"rejected_at"`
 	Subtotal                     domain.Money       `json:"subtotal"`
 	Total                        domain.Money       `json:"total"`
-	Currency                     currency.Type      `json:"currency"`
+	Currency                     string             `json:"currency"`
 	Notes                        *string            `json:"notes"`
 	UpdatedAt                    time.Time          `json:"updated_at"`
 }
 
+type ItemResponse struct {
+	ID          uuid.UUID       `json:"item_id"`
+	QuoteID     uuid.UUID       `json:"quote_id"`
+	Description string          `json:"item_description"`
+	Quantity    decimal.Decimal `json:"quantity"`
+	Unit        string          `json:"unit"`
+	UnitPrice   domain.Money    `json:"unit_price"`
+	Subtotal    domain.Money    `json:"subtotal"`
+	SortOrder   int             `json:"sort_order"`
+	CreatedAt   time.Time       `json:"created_at"`
+	UpdatedAt   time.Time       `json:"updated_at"`
+}
+
+func FromItemDomain(i *domain.QuoteItem) ItemResponse {
+	return ItemResponse{
+		ID:          i.ID,
+		QuoteID:     i.QuoteID,
+		Description: i.Description,
+		Quantity:    i.Quantity,
+		Unit:        i.Unit,
+		UnitPrice:   i.UnitPrice,
+		Subtotal:    i.SubTotal,
+		SortOrder:   i.SortOrder,
+		CreatedAt:   i.CreatedAt,
+		UpdatedAt:   i.UpdatedAt,
+	}
+}
+
 func FromQuoteDomain(q *domain.QuotesModel) QuoteResponse {
+	items := make([]ItemResponse, len(q.Items))
+
+	for i, item := range q.Items {
+		items[i] = FromItemDomain(&item)
+	}
+
 	return QuoteResponse{
 		ID:                           q.ID,
 		LeadID:                       q.LeadID,
@@ -50,7 +86,7 @@ func FromQuoteDomain(q *domain.QuotesModel) QuoteResponse {
 		ProjectResume:                q.ProjectResume,
 		ProjectEstimatedDurationDays: q.ProjectEstimatedDurationDays,
 		FunctionalityExample:         q.FunctionalityExample,
-		Items:                        q.Items,
+		Items:                        items,
 		PaymentMethod:                q.PaymentMethod,
 		Status:                       q.Status,
 		CreatedAt:                    q.CreatedAt,
@@ -60,7 +96,7 @@ func FromQuoteDomain(q *domain.QuotesModel) QuoteResponse {
 		RejectedAt:                   q.RejectedAt,
 		Subtotal:                     q.Subtotal,
 		Total:                        q.Total,
-		Currency:                     q.Currency,
+		Currency:                     q.Currency.String(),
 		Notes:                        q.Notes,
 		UpdatedAt:                    q.UpdatedAt,
 	}

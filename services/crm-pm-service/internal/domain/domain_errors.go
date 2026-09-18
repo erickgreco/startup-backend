@@ -16,4 +16,5 @@ var (
 	ErrPaymethodRequired     = errors.New("payment_method_is_required")
 	ErrInvalidQuoteItem      = errors.New("invalid_quote_item")
 	ErrInvalidDuration       = errors.New("invalid_duration_days")
+	ErrInvalidUnitPrice      = errors.New("unit_price_cannot_have_more_than_2_decimals")
 )

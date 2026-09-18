@@ -37,7 +37,11 @@ func (h *QuotesHandler) Create(c *gin.Context) {
 		return
 	}
 
-	quoteReq := req.ToDomain()
+	quoteReq, err := req.ToDomain()
+	if err != nil {
+		response.BadRequest(c, err)
+		return
+	}
 
 	quote, err := h.service.CreateQuote(c.Request.Context(), id, quoteReq)
 	if err != nil {

@@ -13,11 +13,10 @@ CREATE TABLE quotes(
     project_title                   VARCHAR(500) NOT NULL,
     project_description             TEXT NOT NULL,
     project_resume                  TEXT,
-    project_estimated_duration_days BIGINT,
+    project_estimated_duration_days INT NOT NULL,
 
     -- Detalles de la oferta
     functionality_example           TEXT,
-    quote_items                     JSONB, -- quote_items
     payment_method                  VARCHAR(50) NOT NULL
                                     CHECK (payment_method IN ('upfront', 'milestone', 'upon_delivery', 'split')),
 
@@ -32,14 +31,17 @@ CREATE TABLE quotes(
     subtotal                        BIGINT NOT NULL CHECK (subtotal >= 0),
     total                           BIGINT NOT NULL CHECK (total >= 0),
 
-    currency                        SMALLINT NOT NULL,
+    currency                        VARCHAR(3) NOT NULL
+                                    CHECK (currency ~ '^[A-Z]{3}$'),
     notes                           TEXT,
 
     updated_at                      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT quotes_valid_dates CHECK (valid_until > created_at),
+    CONSTRAINT quotes_valid_dates CHECK (
+        valid_until IS NULL OR sent_at IS NULL OR valid_until > sent_at
+    ),
     CONSTRAINT quotes_total_consistency CHECK (
-        total = subtotal
+        total >= subtotal
     )
 );
 

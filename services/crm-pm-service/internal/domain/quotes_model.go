@@ -2,12 +2,9 @@ package domain
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
-	"github.com/go-playground/locales/currency"
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 type QuoteRequest struct {
@@ -20,7 +17,7 @@ type QuoteRequest struct {
 	ProjectEstimatedDurationDays int
 	Items                        []ItemRequest
 	PaymentMethod                PayMethod
-	Currency                     currency.Type
+	Currency                     Currency // TODO: trabajar con location una vez se implemente middleware
 	Notes                        *string
 }
 
@@ -59,25 +56,12 @@ type QuotesModel struct {
 	Total    Money
 
 	// Metadata
-	Currency currency.Type
+	Currency Currency
 	Notes    *string
 
 	// Auditoria
 	UpdatedAt time.Time
 }
-
-// ** Helper: serializar Items a JSONB (para insertar en DB)
-func (q *QuotesModel) SetItemsToJSON() ([]byte, error) {
-	return json.Marshal(q.Items)
-}
-
-// ** Helper: deserializar JSONB a Items (para leer de BD)
-func (q *QuotesModel) SetItemsFromJSON(data []byte) error {
-	return json.Unmarshal(data, &q.Items)
-}
-
-// ** Representa dinero en centavos 1050 = $10.50 USD
-type Money = decimal.Decimal
 
 type PayMethod string
 
@@ -87,26 +71,26 @@ const (
 		- Clientes nuevos sin track record
 		- Trabajos de bajo riesgo (plantillas o disenos simples)
 	*/
-	PaymentUpfront = "upfront"
+	PaymentUpfront PayMethod = "upfront"
 	/*
 		- Desarrollo complejo
 		- Clientes corporativos
 		- Relaciones a largo plazo
 	*/
-	PaymentMilestone = "milestone"
+	PaymentMilestone PayMethod = "milestone"
 	/*
 		- Proyectos pequenos
 		- Clientes con historial establecido
 		- Entregables simples/tangibles
 		- NO RECOMENDADO PARA PROYECTOS GRANDES
 	*/
-	PaymentUponDelivery = "upon_delivery"
+	PaymentUponDelivery PayMethod = "upon_delivery"
 	/*
 		- Proyectos costosos
 		- Clientes nuevos pero con referencias
 		- Proteccion sin ahuyentar al cliente
 	*/
-	PaymentSplit = "split"
+	PaymentSplit PayMethod = "split"
 )
 
 func (p PayMethod) IsValid() bool {

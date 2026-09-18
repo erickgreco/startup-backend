@@ -46,7 +46,8 @@ type QuoteItem struct {
 	ID          uuid.UUID
 	QuoteID     uuid.UUID
 	Description string
-	Quantity    decimal.Decimal // * Puede ser duracion o cantidad
+	Quantity    decimal.Decimal
+	Unit        string // * hora, mockup, proyecto, etc
 	UnitPrice   Money
 	SubTotal    Money
 	SortOrder   int
@@ -57,5 +58,6 @@ type QuoteItem struct {
 type ItemRequest struct {
 	Description string
 	Quantity    decimal.Decimal
-	UnitPrice   decimal.Decimal
+	Unit        string
+	UnitPrice   Money
 }

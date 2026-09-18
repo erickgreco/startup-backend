@@ -4,14 +4,15 @@ CREATE TABLE quote_items(
     quote_id            UUID NOT NULL REFERENCES quotes(id) ON DELETE CASCADE,
     description         VARCHAR(500) NOT NULL,
     quantity            DECIMAL(10, 2) NOT NULL CHECK (quantity > 0),
-    unit_price_cents    BIGINT NOT NULL CHECK (unit_price_cents > 0),
-    subtotal_cents      BIGINT NOT NULL CHECK (subtotal_cents >= 0),
+    unit_price          BIGINT NOT NULL CHECK (unit_price >= 0),
+    unit                VARCHAR(50) NOT NULL DEFAULT 'unidad',
+    subtotal            BIGINT NOT NULL CHECK (subtotal >= 0),
     sort_order          INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
     CONSTRAINT quote_items_subtotal_consistency CHECK (
-        subtotal_cents = (quantity * unit_price_cents)::BIGINT
+        subtotal = (quantity * unit_price)::BIGINT
     )
 );
 
@@ -34,7 +35,7 @@ FOR EACH ROW
 EXECUTE FUNCTION update_quote_items_updated_at();
 
 -- +goose Down
-DROP TRIGGER IF EXISTS trg_quote_items_updated_at;
+DROP TRIGGER IF EXISTS trg_quote_items_updated_at ON quote_items;
 
 DROP FUNCTION IF EXISTS update_quote_items_updated_at();
 

@@ -28,7 +28,6 @@ func NewQuoteService(quoteRepo domain.QuoteRepository, leadRepo domain.LeadRepos
 	}
 }
 
-// TODO: currency se esta almacenando como int
 func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *domain.QuoteRequest) (*domain.QuotesModel, error) {
 	lead, err := s.leadRepo.GetLeadByID(ctx, leadID)
 	if err != nil {
@@ -36,7 +35,7 @@ func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *d
 	}
 
 	if lead.DataQuality == domain.Low {
-		logger.Warn("warning: data_quality: %v", lead.DataQuality)
+		logger.Warn("warning", "data_quality: %v", lead.DataQuality)
 	}
 
 	if req.ProjectEstimatedDurationDays < 1 || req.ProjectEstimatedDurationDays > 180 {
@@ -47,33 +46,35 @@ func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *d
 		return nil, fmt.Errorf("quote_service: create_quote: %w", domain.ErrMissingItems)
 	}
 
-	if !req.PaymentMethod.IsValid() {
-		return nil, fmt.Errorf("quote_service: create_quote: %w", domain.ErrPaymethodRequired)
-	}
-
 	quoteID := idgen.NewID()
 
 	quoteItems := make([]domain.QuoteItem, len(req.Items))
-	toalSubtotal := decimal.Zero
+	totalSubtotal := domain.ZeroMoney
 
 	for i, item := range req.Items {
-		if item.Quantity.LessThanOrEqual(decimal.Zero) || item.UnitPrice.LessThanOrEqual(decimal.Zero) {
+		if item.Quantity.LessThanOrEqual(decimal.Zero) || item.UnitPrice.LessThanOrEqual(domain.ZeroMoney) {
 			return nil, fmt.Errorf("quote_service: create_quote: invalid_item: %d: %w", i, domain.ErrInvalidQuoteItem)
 		}
 
-		subtotal := item.Quantity.Mul(item.UnitPrice)
+		if item.UnitPrice.HasSubCentPrecision() {
+			return nil, fmt.Errorf("quote_service: create_quote: invalid_item: %d:%w", i, domain.ErrInvalidUnitPrice)
+		}
+
+		subtotal := item.UnitPrice.Mul(item.Quantity)
 
 		quoteItems[i] = domain.QuoteItem{
 			ID:          idgen.NewID(),
 			QuoteID:     quoteID,
 			Description: item.Description,
 			Quantity:    item.Quantity,
+			Unit:        item.Unit,
 			UnitPrice:   item.UnitPrice,
 			SubTotal:    subtotal,
 			SortOrder:   i,
+			CreatedAt:   time.Now(),
 		}
 
-		toalSubtotal = toalSubtotal.Add(subtotal)
+		totalSubtotal = totalSubtotal.Add(subtotal)
 	}
 
 	quoteNumber := idgen.GenerateCode(quotePrefix, quoteID)
@@ -93,8 +94,8 @@ func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *d
 		PaymentMethod:                req.PaymentMethod,
 		Status:                       domain.QuoteStatusDraft,
 		CreatedAt:                    time.Now(),
-		Subtotal:                     toalSubtotal, // ! Por ahora los campos son iguales, falta calcular taxes
-		Total:                        toalSubtotal, // ! Por ahora los campos son iguales, falta calcular taxes
+		Subtotal:                     totalSubtotal, // ! Por ahora los campos son iguales, falta calcular taxes
+		Total:                        totalSubtotal, // ! Por ahora los campos son iguales, falta calcular taxes
 		Currency:                     req.Currency,
 		Notes:                        req.Notes,
 	}
