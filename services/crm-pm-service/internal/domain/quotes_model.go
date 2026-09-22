@@ -124,8 +124,10 @@ func (s QuoteStatus) IsValid() bool {
 
 type QuoteRepository interface {
 	CreateQuote(ctx context.Context, quote *QuotesModel) (*QuotesModel, error)
+	GetQuoteByID(ctx context.Context, id uuid.UUID) (*QuotesModel, error)
 }
 
 type QuoteService interface {
 	CreateQuote(ctx context.Context, leadID uuid.UUID, req *QuoteRequest) (*QuotesModel, error)
+	GetQuoteByID(ctx context.Context, id uuid.UUID) (*QuotesModel, error)
 }

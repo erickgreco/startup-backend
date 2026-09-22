@@ -48,6 +48,21 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const response = res.getBody();
+        const quoteId = response.data?.id;
+
+        if (!quoteId) {
+          console.error("No se encontro el ID en la respuesta");
+          return;
+        }
+
+        bru.setEnvVar("quote_id", quoteId);
+        console.log("quote_id guardado: ", quoteId);
+
 settings:
   encodeUrl: true
   timeout: 0

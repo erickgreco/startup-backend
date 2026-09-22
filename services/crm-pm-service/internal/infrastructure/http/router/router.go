@@ -44,5 +44,6 @@ func registerQuotesRoutes(rg *gin.RouterGroup, qh *handler.QuotesHandler) {
 	quotes := rg.Group("/quotes")
 	{
 		quotes.POST("/:leadID", qh.Create)
+		quotes.GET("/:id", qh.GetByID)
 	}
 }

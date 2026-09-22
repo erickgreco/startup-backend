@@ -51,3 +51,20 @@ func (h *QuotesHandler) Create(c *gin.Context) {
 
 	response.Created(c, dto.FromQuoteDomain(quote))
 }
+
+func (h *QuotesHandler) GetByID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		response.BadRequest(c, ErrInvalidQuoteID)
+		return
+	}
+
+	quote, err := h.service.GetQuoteByID(c.Request.Context(), id)
+	if err != nil {
+		mapDomainError(c, "failed_to_get_quote_by_id", err)
+		return
+	}
+
+	response.Ok(c, dto.FromQuoteDomain(quote))
+}

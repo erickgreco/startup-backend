@@ -34,6 +34,7 @@ func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *d
 		return nil, fmt.Errorf("quote_service: create_quote: %w", err)
 	}
 
+	// TODO: logger solo manda en terminal, se necesita poder mostrar al usuario
 	if lead.DataQuality == domain.Low {
 		logger.Warn("warning", "data_quality: %v", lead.DataQuality)
 	}
@@ -106,4 +107,12 @@ func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *d
 	}
 
 	return createdQuote, nil
+}
+
+func (s *QuoteService) GetQuoteByID(ctx context.Context, id uuid.UUID) (*domain.QuotesModel, error) {
+	quote, err := s.quoteRepo.GetQuoteByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("quote_service: get_quote_by_id: %w", err)
+	}
+	return quote, nil
 }

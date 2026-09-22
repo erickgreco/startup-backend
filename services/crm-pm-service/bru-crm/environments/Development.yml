@@ -5,4 +5,6 @@ variables:
   - name: healthURL
     value: http://localhost:8081/health
   - name: lead_id
-    value: 01a0b2bf-5ce6-7cd5-8d44-e1018d984c7a
+    value: 01a0cb61-aba1-7cde-bd70-853d4e7e6eab
+  - name: quote_id
+    value: 01a0cb61-d926-77bb-abf9-69326ea23440
