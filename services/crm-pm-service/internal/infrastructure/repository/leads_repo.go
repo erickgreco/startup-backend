@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
+	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/infrastructure/repository/sqlgen"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -16,168 +17,49 @@ const (
 )
 
 type LeadRepository struct {
-	pool *pgxpool.Pool
+	queries *sqlgen.Queries
 }
 
 func NewLeadRepository(pool *pgxpool.Pool) *LeadRepository {
 	return &LeadRepository{
-		pool: pool,
+		queries: sqlgen.New(pool),
 	}
 }
 
 func (r *LeadRepository) CreateLead(ctx context.Context, lead *domain.LeadsModel) (*domain.LeadsModel, error) {
-	var createdLead domain.LeadsModel
-
-	query := `
-		INSERT INTO leads (
-			id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source
-		)
-		VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10
-		)
-		RETURNING id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
-	`
-
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
 	defer cancel()
 
-	err := r.pool.QueryRow(
-		ctx,
-		query,
-		lead.ID,
-		lead.Name,
-		lead.BusinessName,
-		lead.PhoneNumber,
-		lead.Email,
-		lead.Message,
-		lead.DataQuality,
-		lead.QualityScore,
-		lead.Status,
-		lead.Source,
-	).Scan(
-		&createdLead.ID,
-		&createdLead.Name,
-		&createdLead.BusinessName,
-		&createdLead.PhoneNumber,
-		&createdLead.Email,
-		&createdLead.Message,
-		&createdLead.DataQuality,
-		&createdLead.QualityScore,
-		&createdLead.Status,
-		&createdLead.Source,
-		&createdLead.CreatedAt,
-		&createdLead.UpdatedAt,
-	)
+	row, err := r.queries.CreateLead(ctx, leadDomainToGen(lead))
 	if err != nil {
 		return nil, fmt.Errorf("leads_repo: create_lead: %w", translateWriteError(err))
 	}
 
-	return &createdLead, nil
-}
-
-// ** Es especifico de leads: traduce el error generico de infraestructura a un error
-// ** de dominio de leads
-func translateWriteError(err error) error {
-	mappedErr := mapWriteError(err)
-
-	if errors.Is(mappedErr, ErrUniqueViolation) {
-		return domain.ErrEmailAlreadyExists
-	}
-	if errors.Is(mappedErr, ErrInvalidData) {
-		return domain.ErrInvalidData
-	}
-	if errors.Is(mappedErr, ErrTimeout) {
-		return domain.ErrRepoTimeout
-	}
-
-	return mappedErr
+	return genToLeadDomain(row), nil
 }
 
 func (r *LeadRepository) GetLeadsByStatus(ctx context.Context, status domain.LeadStatus) ([]*domain.LeadsModel, error) {
-	query := `
-		SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
-		FROM leads
-		WHERE status = $1
-		ORDER BY created_at DESC
-	`
-
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
 	defer cancel()
 
-	rows, err := r.pool.Query(
-		ctx,
-		query,
-		status,
-	)
+	rows, err := r.queries.GetLeadsByStatus(ctx, string(status))
 	if err != nil {
-		mappedErr := mapReadError(err)
-		return nil, fmt.Errorf("leads_repo: get_lead_by_status: %w", mappedErr)
-	}
-	defer rows.Close()
-
-	var leads []*domain.LeadsModel
-	for rows.Next() {
-		var lead domain.LeadsModel
-		if err := rows.Scan(
-			&lead.ID,
-			&lead.Name,
-			&lead.BusinessName,
-			&lead.PhoneNumber,
-			&lead.Email,
-			&lead.Message,
-			&lead.DataQuality,
-			&lead.QualityScore,
-			&lead.Status,
-			&lead.Source,
-			&lead.CreatedAt,
-			&lead.UpdatedAt,
-		); err != nil {
-			return nil, fmt.Errorf("leads_repo: get_leads_by_status: %w", err)
-		}
-		leads = append(leads, &lead)
+		return nil, fmt.Errorf("leads_repo: get_leads_by_status: %w", mapReadError(err))
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("leads_repo: get_leads_by_status: %w", err)
-	}
-
-	if len(leads) == 0 {
-		return nil, domain.ErrNotFound
+	leads := make([]*domain.LeadsModel, 0, len(rows))
+	for _, row := range rows {
+		leads = append(leads, genToLeadDomain(row))
 	}
 
 	return leads, nil
 }
 
 func (r *LeadRepository) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain.LeadsModel, error) {
-	var lead domain.LeadsModel
-
-	query := `
-		SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
-		FROM leads
-		WHERE id = $1
-	`
-
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
 	defer cancel()
 
-	err := r.pool.QueryRow(
-		ctx,
-		query,
-		id,
-	).Scan(
-		&lead.ID,
-		&lead.Name,
-		&lead.BusinessName,
-		&lead.PhoneNumber,
-		&lead.Email,
-		&lead.Message,
-		&lead.DataQuality,
-		&lead.QualityScore,
-		&lead.Status,
-		&lead.Source,
-		&lead.CreatedAt,
-		&lead.UpdatedAt,
-	)
+	row, err := r.queries.GetLeadByID(ctx, id)
 	if err != nil {
 		mappedErr := mapReadError(err)
 		if errors.Is(mappedErr, ErrNotFound) {
@@ -186,41 +68,14 @@ func (r *LeadRepository) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain
 		return nil, fmt.Errorf("leads_repo: get_lead_by_id: %w", mappedErr)
 	}
 
-	return &lead, nil
+	return genToLeadDomain(row), nil
 }
 
 func (r *LeadRepository) UpdateLeadStatus(ctx context.Context, id uuid.UUID, status domain.LeadStatus) (*domain.LeadsModel, error) {
-	var lead domain.LeadsModel
-
-	query := `
-		UPDATE leads
-		SET status = $1
-		WHERE id = $2
-		RETURNING id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
-	`
-
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
 	defer cancel()
 
-	err := r.pool.QueryRow(
-		ctx,
-		query,
-		status,
-		id,
-	).Scan(
-		&lead.ID,
-		&lead.Name,
-		&lead.BusinessName,
-		&lead.PhoneNumber,
-		&lead.Email,
-		&lead.Message,
-		&lead.DataQuality,
-		&lead.QualityScore,
-		&lead.Status,
-		&lead.Source,
-		&lead.CreatedAt,
-		&lead.UpdatedAt,
-	)
+	row, err := r.queries.UpdateLeadStatus(ctx, string(status), id)
 	if err != nil {
 		mappedErr := mapReadError(err)
 		if errors.Is(mappedErr, ErrNotFound) {
@@ -229,28 +84,19 @@ func (r *LeadRepository) UpdateLeadStatus(ctx context.Context, id uuid.UUID, sta
 		return nil, fmt.Errorf("leads_repo: update_lead_status: %w", translateWriteError(err))
 	}
 
-	return &lead, nil
+	return genToLeadDomain(row), nil
 }
 
 func (r *LeadRepository) DeleteLead(ctx context.Context, id uuid.UUID) error {
-	query := `
-		DELETE FROM leads
-		WHERE id = $1
-	`
-
 	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
 	defer cancel()
 
-	tag, err := r.pool.Exec(
-		ctx,
-		query,
-		id,
-	)
+	affected, err := r.queries.DeleteLead(ctx, id)
 	if err != nil {
 		return fmt.Errorf("leads_repo: delete_lead: %w", translateWriteError(err))
 	}
 
-	if tag.RowsAffected() == 0 {
+	if affected == 0 {
 		return domain.ErrNotFound
 	}
 

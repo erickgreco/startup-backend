@@ -1,0 +1,41 @@
+version: "2"
+sql: 
+    - engine: "postgresql"
+      schema: "internal/infrastructure/db/migrations"
+      queries: "internal/infrastructure/repository/queries"
+      rules:
+        - delete-must-use-execrows
+      gen:
+        go:
+          package: "sqlgen"
+          out: "internal/infrastructure/repository/sqlgen"
+          sql_package: "pgx/v5"
+          emit_pointers_for_null_types: true
+          emit_result_struct_pointers: false
+          emit_params_struct_pointers: false
+          emit_empty_slices: true
+          emit_sql_as_comment: true
+          omit_unused_structs: true
+          initialisms: ["id"]
+          query_parameter_limit: 2
+          overrides:
+            - db_type: "uuid"
+              go_type: { import: "github.com/google/uuid", type: "UUID" }
+            - db_type: "uuid"
+              nullable: true
+              go_type: { import: "github.com/google/uuid", type: "UUID", pointer: true }
+            - db_type: "timestamptz"
+              go_type: "time.Time"
+            - db_type: "timestamptz"
+              nullable: true
+              go_type: { import: "time", type: "Time", pointer: true }
+            - db_type: "pg_catalog.timestamptz"
+              go_type: "time.Time"
+            - db_type: "pg_catalog.timestamptz"
+              nullable: true
+              go_type: { import: "time", type: "Time", pointer: true }
+rules:
+  - name: delete-must-use-execrows
+    message: "DELETE debe usar : execrows para poder devolver 404"
+    rule: |
+        query.sql.contains("DELETE") && query.cmd != "execrows"
