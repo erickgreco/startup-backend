@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/infrastructure/repository/sqlgen"
 )
@@ -41,22 +39,4 @@ func genToLeadDomain(row sqlgen.Lead) *domain.LeadsModel {
 		CreatedAt:    row.CreatedAt,
 		UpdatedAt:    row.UpdatedAt,
 	}
-}
-
-// ** Es especifico de leads: traduce el error generico de infraestructura a un error
-// ** de dominio de leads
-func translateWriteError(err error) error {
-	mappedErr := mapWriteError(err)
-
-	if errors.Is(mappedErr, ErrUniqueViolation) {
-		return domain.ErrEmailAlreadyExists
-	}
-	if errors.Is(mappedErr, ErrInvalidData) {
-		return domain.ErrInvalidData
-	}
-	if errors.Is(mappedErr, ErrTimeout) {
-		return domain.ErrRepoTimeout
-	}
-
-	return mappedErr
 }

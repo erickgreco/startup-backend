@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -44,7 +43,7 @@ func (r *LeadRepository) GetLeadsByStatus(ctx context.Context, status domain.Lea
 
 	rows, err := r.queries.GetLeadsByStatus(ctx, string(status))
 	if err != nil {
-		return nil, fmt.Errorf("leads_repo: get_leads_by_status: %w", mapReadError(err))
+		return nil, fmt.Errorf("leads_repo: get_leads_by_status: %w", translateReadError(err))
 	}
 
 	leads := make([]*domain.LeadsModel, 0, len(rows))
@@ -61,11 +60,7 @@ func (r *LeadRepository) GetLeadByID(ctx context.Context, id uuid.UUID) (*domain
 
 	row, err := r.queries.GetLeadByID(ctx, id)
 	if err != nil {
-		mappedErr := mapReadError(err)
-		if errors.Is(mappedErr, ErrNotFound) {
-			return nil, domain.ErrNotFound
-		}
-		return nil, fmt.Errorf("leads_repo: get_lead_by_id: %w", mappedErr)
+		return nil, fmt.Errorf("leads_repo: get_lead_by_id: %w", translateReadError(err))
 	}
 
 	return genToLeadDomain(row), nil
@@ -77,11 +72,7 @@ func (r *LeadRepository) UpdateLeadStatus(ctx context.Context, id uuid.UUID, sta
 
 	row, err := r.queries.UpdateLeadStatus(ctx, string(status), id)
 	if err != nil {
-		mappedErr := mapReadError(err)
-		if errors.Is(mappedErr, ErrNotFound) {
-			return nil, domain.ErrNotFound
-		}
-		return nil, fmt.Errorf("leads_repo: update_lead_status: %w", translateWriteError(err))
+		return nil, fmt.Errorf("leads_repo: update_lead_status: %w", translateUpdateError(err))
 	}
 
 	return genToLeadDomain(row), nil

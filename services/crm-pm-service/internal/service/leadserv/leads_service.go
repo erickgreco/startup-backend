@@ -6,7 +6,6 @@ import (
 
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
 	"github.com/erickgreco/startup-backend/shared/idgen"
-	"github.com/erickgreco/startup-backend/shared/logger"
 	"github.com/google/uuid"
 )
 
@@ -32,8 +31,6 @@ func (s *LeadService) CreateLead(ctx context.Context, req *domain.LeadRequest) (
 	}
 
 	analysis := s.analyzer.Analyze(req.Message)
-
-	logger.Info("lead_analysis", "score:", analysis.Score, "quality:", analysis.QA, "concepts:", analysis.FoundConcepts)
 
 	model := &domain.LeadsModel{
 		ID:           idgen.NewID(),

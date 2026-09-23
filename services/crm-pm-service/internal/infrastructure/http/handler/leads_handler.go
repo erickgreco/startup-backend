@@ -20,7 +20,6 @@ func NewLeadsHandler(service domain.LeadService) *LeadsHandler {
 	}
 }
 
-// TODO: por ahora el source es hardcodeado, debera cambiar
 func (h *LeadsHandler) Create(c *gin.Context) {
 	var req dto.CreateLeadRequest
 
@@ -30,6 +29,7 @@ func (h *LeadsHandler) Create(c *gin.Context) {
 	}
 
 	leadReq := req.ToDomain()
+	// TODO: por ahora el source es hardcodeado, debera cambiar
 	leadReq.Source = domain.LeadSrcManual
 
 	lead, err := h.service.CreateLead(c.Request.Context(), leadReq)
