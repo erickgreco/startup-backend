@@ -120,6 +120,50 @@ func (q *Queries) GetLeadByID(ctx context.Context, id uuid.UUID) (Lead, error) {
 	return i, err
 }
 
+const getLeadsByEmail = `-- name: GetLeadsByEmail :many
+SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
+WHERE email = $1
+ORDER BY created_at DESC
+`
+
+// GetLeadsByEmail
+//
+//	SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
+//	WHERE email = $1
+//	ORDER BY created_at DESC
+func (q *Queries) GetLeadsByEmail(ctx context.Context, email string) ([]Lead, error) {
+	rows, err := q.db.Query(ctx, getLeadsByEmail, email)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Lead{}
+	for rows.Next() {
+		var i Lead
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Message,
+			&i.Status,
+			&i.Source,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DataQuality,
+			&i.QualityScore,
+			&i.PhoneNumber,
+			&i.BusinessName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLeadsByStatus = `-- name: GetLeadsByStatus :many
 SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
 WHERE status = $1

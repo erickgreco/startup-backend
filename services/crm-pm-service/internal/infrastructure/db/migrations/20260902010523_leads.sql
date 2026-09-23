@@ -12,7 +12,7 @@ CREATE TABLE leads (
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE UNIQUE INDEX idx_leads_email ON leads (email);
+CREATE INDEX idx_leads_email ON leads (email);
 
 CREATE INDEX idx_leads_status ON leads (status);
 

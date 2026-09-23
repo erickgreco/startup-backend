@@ -26,3 +26,8 @@ RETURNING *;
 -- name: DeleteLead :execrows
 DELETE FROM leads
 WHERE id = $1;
+
+-- name: GetLeadsByEmail :many
+SELECT * FROM leads
+WHERE email = $1
+ORDER BY created_at DESC;

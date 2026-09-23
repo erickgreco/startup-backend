@@ -16,6 +16,8 @@ var (
 	ErrMissingStatusParam = errors.New("status_query_parameter_is_required")
 	ErrInvalidLeadID      = errors.New("invalid_lead_id")
 	ErrInvalidQuoteID     = errors.New("invalid_quote_id")
+	ErrMissingEmailParam  = errors.New("email_query_parameter_is_required")
+	ErrMissingFilterParam = errors.New("query_parameter_is_required")
 )
 
 func mapDomainError(c *gin.Context, logMsg string, err error) {

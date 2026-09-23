@@ -93,3 +93,20 @@ func (r *LeadRepository) DeleteLead(ctx context.Context, id uuid.UUID) error {
 
 	return nil
 }
+
+func (r *LeadRepository) GetLeadsByEmail(ctx context.Context, email string) ([]*domain.LeadsModel, error) {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
+	defer cancel()
+
+	rows, err := r.queries.GetLeadsByEmail(ctx, email)
+	if err != nil {
+		return nil, fmt.Errorf("leads_repo: get_leads_by_email: %w", translateReadError(err))
+	}
+
+	leads := make([]*domain.LeadsModel, 0, len(rows))
+	for _, row := range rows {
+		leads = append(leads, genToLeadDomain(row))
+	}
+
+	return leads, nil
+}

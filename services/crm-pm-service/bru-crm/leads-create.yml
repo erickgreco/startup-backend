@@ -24,14 +24,23 @@ runtime:
       code: |-
         const response = res.getBody();
         const leadId = response.data?.id;
+        const emailParam = response.data?.email;
 
         if (!leadId) {
           console.error("No se encontro el ID en la respuesta");
           return;
         }
 
+        if (!emailParam) {
+          console.error("No se encontro el email en la respuesta");
+          return;
+        }
+
         bru.setEnvVar("lead_id", leadId);
         console.log("lead_id guardado: ", leadId);
+
+        bru.setEnvVar("email", emailParam);
+        console.log("email guardado: ", emailParam);
 
 settings:
   encodeUrl: true

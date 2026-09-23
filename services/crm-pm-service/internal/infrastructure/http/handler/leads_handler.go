@@ -42,13 +42,13 @@ func (h *LeadsHandler) Create(c *gin.Context) {
 }
 
 func (h *LeadsHandler) GetByStatus(c *gin.Context) {
-	statusParam := c.Query("status")
-	if statusParam == "" {
+	statusQuery := c.Query("status")
+	if statusQuery == "" {
 		response.BadRequest(c, ErrMissingStatusParam)
 		return
 	}
 
-	status := domain.LeadStatus(statusParam)
+	status := domain.LeadStatus(statusQuery)
 
 	leads, err := h.service.GetLeadsByStatus(c.Request.Context(), status)
 	if err != nil {
@@ -116,4 +116,31 @@ func (h *LeadsHandler) Delete(c *gin.Context) {
 	}
 
 	response.NoContent(c)
+}
+
+func (h *LeadsHandler) GetByEmail(c *gin.Context) {
+	emailQuery := c.Query("email")
+	if emailQuery == "" {
+		response.BadRequest(c, ErrMissingEmailParam)
+		return
+	}
+
+	leads, err := h.service.GetLeadsByEmail(c.Request.Context(), emailQuery)
+	if err != nil {
+		mapDomainError(c, "failed_to_get_lead_by_email", err)
+		return
+	}
+
+	response.Ok(c, dto.FromLeadDomainList(leads))
+}
+
+func (h *LeadsHandler) List(c *gin.Context) {
+	switch {
+	case c.Query("email") != "":
+		h.GetByEmail(c)
+	case c.Query("status") != "":
+		h.GetByStatus(c)
+	default:
+		response.BadRequest(c, ErrMissingFilterParam)
+	}
 }
