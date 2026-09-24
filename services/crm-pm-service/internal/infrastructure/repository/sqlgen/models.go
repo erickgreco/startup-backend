@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 type Lead struct {
@@ -23,4 +24,44 @@ type Lead struct {
 	QualityScore float64
 	PhoneNumber  string
 	BusinessName string
+}
+
+type Quote struct {
+	ID                           uuid.UUID
+	LeadID                       uuid.UUID
+	QuoteNumber                  string
+	ClientName                   string
+	ClientBusiness               *string
+	ClientEmail                  string
+	ClientPhone                  string
+	ProjectTitle                 string
+	ProjectDescription           string
+	ProjectResume                *string
+	ProjectEstimatedDurationDays int32
+	FunctionalityExample         *string
+	PaymentMethod                string
+	Status                       string
+	CreatedAt                    time.Time
+	ValidUntil                   *time.Time
+	SentAt                       *time.Time
+	AcceptedAt                   *time.Time
+	RejectedAt                   *time.Time
+	Subtotal                     int64
+	Total                        int64
+	Currency                     string
+	Notes                        *string
+	UpdatedAt                    time.Time
+}
+
+type QuoteItem struct {
+	ID          uuid.UUID
+	QuoteID     uuid.UUID
+	Description string
+	Quantity    decimal.Decimal
+	UnitPrice   int64
+	Unit        string
+	Subtotal    int64
+	SortOrder   int32
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

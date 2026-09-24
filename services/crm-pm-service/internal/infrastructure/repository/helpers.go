@@ -40,3 +40,98 @@ func genToLeadDomain(row sqlgen.Lead) *domain.LeadsModel {
 		UpdatedAt:    row.UpdatedAt,
 	}
 }
+
+func quoteDomainToGen(quote *domain.QuotesModel) sqlgen.CreateQuoteParams {
+	return sqlgen.CreateQuoteParams{
+		ID:                           quote.ID,
+		LeadID:                       quote.LeadID,
+		QuoteNumber:                  quote.QuoteNumber,
+		ClientName:                   quote.ClientName,
+		ClientBusiness:               quote.ClientBusiness,
+		ClientEmail:                  quote.ClientEmail,
+		ClientPhone:                  quote.ClientPhone,
+		ProjectTitle:                 quote.ProjectTitle,
+		ProjectDescription:           quote.ProjectDescription,
+		ProjectEstimatedDurationDays: int32(quote.ProjectEstimatedDurationDays),
+		PaymentMethod:                string(quote.PaymentMethod),
+		Status:                       string(quote.Status),
+		CreatedAt:                    quote.CreatedAt,
+		Subtotal:                     quote.Subtotal.ToCents(),
+		Total:                        quote.Total.ToCents(),
+		Currency:                     quote.Currency.String(),
+		Notes:                        quote.Notes,
+	}
+}
+
+func quoteItemsDomainToGen(items []domain.QuoteItem) []sqlgen.CreateQuoteItemsParams {
+	params := make([]sqlgen.CreateQuoteItemsParams, 0, len(items))
+	for i, item := range items {
+		params = append(params, sqlgen.CreateQuoteItemsParams{
+			ID:          item.ID,
+			QuoteID:     item.QuoteID,
+			Description: item.Description,
+			Quantity:    item.Quantity,
+			Unit:        item.Unit,
+			UnitPrice:   item.UnitPrice.ToCents(),
+			Subtotal:    item.SubTotal.ToCents(),
+			SortOrder:   int32(i),
+			CreatedAt:   item.CreatedAt,
+		})
+	}
+
+	return params
+}
+
+func genToQuoteDomain(row sqlgen.Quote, items []sqlgen.QuoteItem) (*domain.QuotesModel, error) {
+	currency, err := domain.ParseCurrency(row.Currency)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.QuotesModel{
+		ID:                           row.ID,
+		LeadID:                       row.LeadID,
+		QuoteNumber:                  row.QuoteNumber,
+		ClientName:                   row.ClientName,
+		ClientBusiness:               row.ClientBusiness,
+		ClientEmail:                  row.ClientEmail,
+		ClientPhone:                  row.ClientPhone,
+		ProjectTitle:                 row.ProjectTitle,
+		ProjectDescription:           row.ProjectDescription,
+		ProjectResume:                row.ProjectResume,
+		ProjectEstimatedDurationDays: int(row.ProjectEstimatedDurationDays),
+		FunctionalityExample:         row.FunctionalityExample,
+		Items:                        genItemsToDomain(items),
+		PaymentMethod:                domain.PayMethod(row.PaymentMethod),
+		Status:                       domain.QuoteStatus(row.Status),
+		CreatedAt:                    row.CreatedAt,
+		SentAt:                       row.SentAt,
+		AcceptedAt:                   row.AcceptedAt,
+		RejectedAt:                   row.RejectedAt,
+		Subtotal:                     domain.FromCents(row.Subtotal),
+		Total:                        domain.FromCents(row.Total),
+		Currency:                     currency,
+		Notes:                        row.Notes,
+		UpdatedAt:                    row.UpdatedAt,
+	}, nil
+}
+
+func genItemsToDomain(rows []sqlgen.QuoteItem) []domain.QuoteItem {
+	items := make([]domain.QuoteItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, domain.QuoteItem{
+			ID:          row.ID,
+			QuoteID:     row.QuoteID,
+			Description: row.Description,
+			Quantity:    row.Quantity,
+			Unit:        row.Unit,
+			UnitPrice:   domain.FromCents(row.UnitPrice),
+			SubTotal:    domain.FromCents(row.Subtotal),
+			SortOrder:   int(row.SortOrder),
+			CreatedAt:   row.CreatedAt,
+			UpdatedAt:   row.UpdatedAt,
+		})
+	}
+
+	return items
+}
