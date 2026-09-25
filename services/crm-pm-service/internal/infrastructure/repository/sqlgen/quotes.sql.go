@@ -185,3 +185,110 @@ func (q *Queries) ListQuoteItemsByQuoteID(ctx context.Context, quoteID uuid.UUID
 	}
 	return items, nil
 }
+
+const updateQuote = `-- name: UpdateQuote :one
+UPDATE quotes
+SET
+    client_name                     = $1,
+    client_business                 = $2,
+    client_email                    = $3,
+    client_phone                    = $4,
+    project_title                   = $5,
+    project_description             = $6,
+    project_resume                  = $7,
+    project_estimated_duration_days = $8,
+    functionality_example           = $9,
+    payment_method                  = $10,
+    subtotal                        = $11,
+    total                           = $12,
+    currency                        = $13,
+    notes                           = $14
+WHERE id = $15 AND status = 'draft'
+RETURNING id, lead_id, quote_number, client_name, client_business, client_email, client_phone, project_title, project_description, project_resume, project_estimated_duration_days, functionality_example, payment_method, status, created_at, valid_until, sent_at, accepted_at, rejected_at, subtotal, total, currency, notes, updated_at
+`
+
+type UpdateQuoteParams struct {
+	ClientName                   string
+	ClientBusiness               *string
+	ClientEmail                  string
+	ClientPhone                  string
+	ProjectTitle                 string
+	ProjectDescription           string
+	ProjectResume                *string
+	ProjectEstimatedDurationDays int32
+	FunctionalityExample         *string
+	PaymentMethod                string
+	Subtotal                     int64
+	Total                        int64
+	Currency                     string
+	Notes                        *string
+	ID                           uuid.UUID
+}
+
+// UpdateQuote
+//
+//	UPDATE quotes
+//	SET
+//	    client_name                     = $1,
+//	    client_business                 = $2,
+//	    client_email                    = $3,
+//	    client_phone                    = $4,
+//	    project_title                   = $5,
+//	    project_description             = $6,
+//	    project_resume                  = $7,
+//	    project_estimated_duration_days = $8,
+//	    functionality_example           = $9,
+//	    payment_method                  = $10,
+//	    subtotal                        = $11,
+//	    total                           = $12,
+//	    currency                        = $13,
+//	    notes                           = $14
+//	WHERE id = $15 AND status = 'draft'
+//	RETURNING id, lead_id, quote_number, client_name, client_business, client_email, client_phone, project_title, project_description, project_resume, project_estimated_duration_days, functionality_example, payment_method, status, created_at, valid_until, sent_at, accepted_at, rejected_at, subtotal, total, currency, notes, updated_at
+func (q *Queries) UpdateQuote(ctx context.Context, arg UpdateQuoteParams) (Quote, error) {
+	row := q.db.QueryRow(ctx, updateQuote,
+		arg.ClientName,
+		arg.ClientBusiness,
+		arg.ClientEmail,
+		arg.ClientPhone,
+		arg.ProjectTitle,
+		arg.ProjectDescription,
+		arg.ProjectResume,
+		arg.ProjectEstimatedDurationDays,
+		arg.FunctionalityExample,
+		arg.PaymentMethod,
+		arg.Subtotal,
+		arg.Total,
+		arg.Currency,
+		arg.Notes,
+		arg.ID,
+	)
+	var i Quote
+	err := row.Scan(
+		&i.ID,
+		&i.LeadID,
+		&i.QuoteNumber,
+		&i.ClientName,
+		&i.ClientBusiness,
+		&i.ClientEmail,
+		&i.ClientPhone,
+		&i.ProjectTitle,
+		&i.ProjectDescription,
+		&i.ProjectResume,
+		&i.ProjectEstimatedDurationDays,
+		&i.FunctionalityExample,
+		&i.PaymentMethod,
+		&i.Status,
+		&i.CreatedAt,
+		&i.ValidUntil,
+		&i.SentAt,
+		&i.AcceptedAt,
+		&i.RejectedAt,
+		&i.Subtotal,
+		&i.Total,
+		&i.Currency,
+		&i.Notes,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

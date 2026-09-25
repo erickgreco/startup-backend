@@ -135,3 +135,23 @@ func genItemsToDomain(rows []sqlgen.QuoteItem) []domain.QuoteItem {
 
 	return items
 }
+
+func quoteDomainToGenUpdate(quote *domain.QuotesModel) sqlgen.UpdateQuoteParams {
+	return sqlgen.UpdateQuoteParams{
+		ClientName:                   quote.ClientName,
+		ClientBusiness:               quote.ClientBusiness,
+		ClientEmail:                  quote.ClientEmail,
+		ClientPhone:                  quote.ClientPhone,
+		ProjectTitle:                 quote.ProjectTitle,
+		ProjectDescription:           quote.ProjectDescription,
+		ProjectResume:                quote.ProjectResume,
+		ProjectEstimatedDurationDays: int32(quote.ProjectEstimatedDurationDays),
+		FunctionalityExample:         quote.FunctionalityExample,
+		PaymentMethod:                string(quote.PaymentMethod),
+		Subtotal:                     quote.Subtotal.ToCents(),
+		Total:                        quote.Total.ToCents(),
+		Currency:                     quote.Currency.String(),
+		Notes:                        quote.Notes,
+		ID:                           quote.ID,
+	}
+}

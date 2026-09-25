@@ -97,3 +97,64 @@ func (r *QuoteRepository) GetQuoteByID(ctx context.Context, id uuid.UUID) (*doma
 
 	return quote, nil
 }
+
+func (r *QuoteRepository) UpdateQuote(ctx context.Context, quote *domain.QuotesModel) (*domain.QuotesModel, error) {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
+	defer cancel()
+
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("quotes_repo: update_quote: begin_transaction: %w", translateWriteError(err))
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := r.queries.WithTx(tx)
+
+	quoteRow, err := qtx.UpdateQuote(ctx, quoteDomainToGenUpdate(quote))
+	if err != nil {
+		return nil, fmt.Errorf("quotes_repo: update_quote: update_quote: %w", translateUpdateError(err))
+	}
+
+	affected, err := qtx.DeleteQuoteItemsByQuoteID(ctx, quote.ID)
+	if err != nil {
+		return nil, fmt.Errorf("quotes_repo: update_quote: delete_quote_items: %w", translateWriteError(err))
+	}
+
+	if affected == 0 {
+		return nil, domain.ErrInternal
+	}
+
+	itemRows := make([]sqlgen.QuoteItem, 0, len(quote.Items))
+	if len(quote.Items) > 0 {
+		var batchErr error
+
+		results := qtx.CreateQuoteItems(ctx, quoteItemsDomainToGen(quote.Items))
+		results.QueryRow(func(_ int, qi sqlgen.QuoteItem, err error) {
+			if err != nil {
+				if batchErr == nil {
+					batchErr = err
+				}
+				return
+			}
+			itemRows = append(itemRows, qi)
+		})
+		if err := results.Close(); err != nil && batchErr == nil {
+			batchErr = err
+		}
+
+		if batchErr != nil {
+			return nil, fmt.Errorf("quotes_repo: update_quote: insert_quote_items: %w", translateWriteError(batchErr))
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("quotes_repo: update_quote: commit_transaction: %w", translateWriteError(err))
+	}
+
+	updated, err := genToQuoteDomain(quoteRow, itemRows)
+	if err != nil {
+		return nil, fmt.Errorf("quotes_repo: update_quote: map_result: %w", fmt.Errorf("%w: %w", domain.ErrInternal, err))
+	}
+
+	return updated, nil
+}

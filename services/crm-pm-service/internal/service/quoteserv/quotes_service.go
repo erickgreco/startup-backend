@@ -116,3 +116,72 @@ func (s *QuoteService) GetQuoteByID(ctx context.Context, id uuid.UUID) (*domain.
 	}
 	return quote, nil
 }
+
+// * Metodo de pago se valida en dto por conversion a dominio (string <-> domain)
+// * Actualiza el draft, no cambia status ni fechas (solo updatedAt a nivel db)
+func (s *QuoteService) UpdateQuote(ctx context.Context, quoteID uuid.UUID, req *domain.QuoteRequest) (*domain.QuotesModel, error) {
+	if err := validateRequest(req); err != nil {
+		return nil, fmt.Errorf("quote_service: create_manual_quote: %w", err)
+	}
+
+	existing, err := s.quoteRepo.GetQuoteByID(ctx, quoteID)
+	if err != nil {
+		return nil, fmt.Errorf("quote_service: update_quote: get_existing_quote: %w", err)
+	}
+
+	if existing.Status != domain.QuoteStatusDraft {
+		return nil, domain.ErrInvalidStatusForUpdate
+	}
+
+	items := make([]domain.QuoteItem, len(req.Items))
+	totalSubtotal := domain.ZeroMoney
+	itemCreation := time.Now()
+
+	for i, item := range req.Items {
+		subtotal := item.UnitPrice.Mul(item.Quantity)
+
+		items[i] = domain.QuoteItem{
+			ID:          idgen.NewID(),
+			QuoteID:     existing.ID,
+			Description: item.Description,
+			Quantity:    item.Quantity,
+			Unit:        item.Unit,
+			UnitPrice:   item.UnitPrice,
+			SubTotal:    subtotal,
+			SortOrder:   i,
+			CreatedAt:   itemCreation,
+		}
+
+		totalSubtotal = totalSubtotal.Add(subtotal)
+	}
+
+	newQuote := &domain.QuotesModel{
+		ID:                           existing.ID,
+		LeadID:                       existing.LeadID,
+		QuoteNumber:                  existing.QuoteNumber,
+		ClientName:                   req.ClientName,
+		ClientBusiness:               req.ClientBusiness,
+		ClientEmail:                  req.ClientEmail,
+		ClientPhone:                  req.ClientPhone,
+		ProjectTitle:                 req.ProjectTitle,
+		ProjectDescription:           req.ProjectDescription,
+		ProjectResume:                req.ProjectResume,
+		ProjectEstimatedDurationDays: req.ProjectEstimatedDurationDays,
+		Items:                        items,
+		FunctionalityExample:         req.FunctionalityExample,
+		PaymentMethod:                req.PaymentMethod,
+		Status:                       domain.QuoteStatusDraft,
+		CreatedAt:                    existing.CreatedAt,
+		Subtotal:                     totalSubtotal, // ! Por ahora los campos son iguales, falta calcular taxes
+		Total:                        totalSubtotal, // ! Por ahora los campos son iguales, falta calcular taxes
+		Currency:                     req.Currency,
+		Notes:                        req.Notes,
+	}
+
+	updated, err := s.quoteRepo.UpdateQuote(ctx, newQuote)
+	if err != nil {
+		return nil, fmt.Errorf("quote_service: update_quote: %w", err)
+	}
+
+	return updated, nil
+}

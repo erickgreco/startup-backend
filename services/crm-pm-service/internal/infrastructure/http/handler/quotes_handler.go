@@ -68,3 +68,33 @@ func (h *QuotesHandler) GetByID(c *gin.Context) {
 
 	response.Ok(c, dto.FromQuoteDomain(quote))
 }
+
+func (h *QuotesHandler) UpdateDraft(c *gin.Context) {
+	var req dto.CreateQuoteRequest
+
+	idParam := c.Param("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		response.BadRequest(c, ErrInvalidQuoteID)
+		return
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Error("quote_handler_err", err)
+		return
+	}
+
+	quoteReq, err := req.ToDomain()
+	if err != nil {
+		response.BadRequest(c, err)
+		return
+	}
+
+	updated, err := h.service.UpdateQuote(c.Request.Context(), id, quoteReq)
+	if err != nil {
+		mapDomainError(c, "failed_to_update_quote", err)
+		return
+	}
+
+	response.Ok(c, dto.FromQuoteDomain(updated))
+}
