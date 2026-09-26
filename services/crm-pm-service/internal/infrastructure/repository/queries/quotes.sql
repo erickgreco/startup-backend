@@ -2,10 +2,10 @@
 -- name: CreateQuote :one
 INSERT INTO quotes (
     id, lead_id, quote_number, client_name, client_business, client_email, client_phone,
-	project_title, project_description, project_estimated_duration_days,
-	payment_method, status, created_at, subtotal, total, currency, notes
+	project_title, project_description, project_resume, project_estimated_duration_days,
+	functionality_example, payment_method, status, created_at, subtotal, total, currency, notes
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
 )
 RETURNING *;
 

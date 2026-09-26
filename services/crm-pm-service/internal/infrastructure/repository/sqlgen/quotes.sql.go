@@ -15,17 +15,17 @@ import (
 const createQuote = `-- name: CreateQuote :one
 INSERT INTO quotes (
     id, lead_id, quote_number, client_name, client_business, client_email, client_phone,
-	project_title, project_description, project_estimated_duration_days,
-	payment_method, status, created_at, subtotal, total, currency, notes
+	project_title, project_description, project_resume, project_estimated_duration_days,
+	functionality_example, payment_method, status, created_at, subtotal, total, currency, notes
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
 )
 RETURNING id, lead_id, quote_number, client_name, client_business, client_email, client_phone, project_title, project_description, project_resume, project_estimated_duration_days, functionality_example, payment_method, status, created_at, valid_until, sent_at, accepted_at, rejected_at, subtotal, total, currency, notes, updated_at
 `
 
 type CreateQuoteParams struct {
 	ID                           uuid.UUID
-	LeadID                       uuid.UUID
+	LeadID                       *uuid.UUID
 	QuoteNumber                  string
 	ClientName                   string
 	ClientBusiness               *string
@@ -33,7 +33,9 @@ type CreateQuoteParams struct {
 	ClientPhone                  string
 	ProjectTitle                 string
 	ProjectDescription           string
+	ProjectResume                *string
 	ProjectEstimatedDurationDays int32
+	FunctionalityExample         *string
 	PaymentMethod                string
 	Status                       string
 	CreatedAt                    time.Time
@@ -47,10 +49,10 @@ type CreateQuoteParams struct {
 //
 //	INSERT INTO quotes (
 //	    id, lead_id, quote_number, client_name, client_business, client_email, client_phone,
-//		project_title, project_description, project_estimated_duration_days,
-//		payment_method, status, created_at, subtotal, total, currency, notes
+//		project_title, project_description, project_resume, project_estimated_duration_days,
+//		functionality_example, payment_method, status, created_at, subtotal, total, currency, notes
 //	) VALUES (
-//	    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+//	    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
 //	)
 //	RETURNING id, lead_id, quote_number, client_name, client_business, client_email, client_phone, project_title, project_description, project_resume, project_estimated_duration_days, functionality_example, payment_method, status, created_at, valid_until, sent_at, accepted_at, rejected_at, subtotal, total, currency, notes, updated_at
 func (q *Queries) CreateQuote(ctx context.Context, arg CreateQuoteParams) (Quote, error) {
@@ -64,7 +66,9 @@ func (q *Queries) CreateQuote(ctx context.Context, arg CreateQuoteParams) (Quote
 		arg.ClientPhone,
 		arg.ProjectTitle,
 		arg.ProjectDescription,
+		arg.ProjectResume,
 		arg.ProjectEstimatedDurationDays,
+		arg.FunctionalityExample,
 		arg.PaymentMethod,
 		arg.Status,
 		arg.CreatedAt,

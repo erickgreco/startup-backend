@@ -12,7 +12,7 @@ import (
 // TODO: cambiar tipos de dominio a string
 type QuoteResponse struct {
 	ID                           uuid.UUID          `json:"id"`
-	LeadID                       uuid.UUID          `json:"lead_id"`
+	LeadID                       *uuid.UUID         `json:"lead_id"`
 	QuoteNumber                  string             `json:"quote_number"`
 	ClientName                   string             `json:"client_name"`
 	ClientBusiness               *string            `json:"client_business"`

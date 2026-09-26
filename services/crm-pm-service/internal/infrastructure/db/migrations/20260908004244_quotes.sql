@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE quotes(
     id                              UUID PRIMARY KEY,
-    lead_id                         UUID NOT NULL REFERENCES leads(id) ON DELETE RESTRICT,
+    lead_id                         UUID REFERENCES leads(id) ON DELETE RESTRICT,
     quote_number                    VARCHAR(50) NOT NULL UNIQUE,
 
     client_name                     VARCHAR(255) NOT NULL,

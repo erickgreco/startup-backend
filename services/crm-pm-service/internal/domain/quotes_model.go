@@ -14,7 +14,9 @@ type QuoteRequest struct {
 	ClientPhone                  string
 	ProjectTitle                 string
 	ProjectDescription           string
+	ProjectResume                *string
 	ProjectEstimatedDurationDays int
+	FunctionalityExample         *string
 	Items                        []ItemRequest
 	PaymentMethod                PayMethod
 	Currency                     Currency // TODO: trabajar con location una vez se implemente middleware
@@ -23,7 +25,7 @@ type QuoteRequest struct {
 
 type QuotesModel struct {
 	ID          uuid.UUID
-	LeadID      uuid.UUID
+	LeadID      *uuid.UUID
 	QuoteNumber string
 
 	// Client data
@@ -129,7 +131,8 @@ type QuoteRepository interface {
 }
 
 type QuoteService interface {
-	CreateQuote(ctx context.Context, leadID uuid.UUID, req *QuoteRequest) (*QuotesModel, error)
+	CreateManualQuote(ctx context.Context, req *QuoteRequest) (*QuotesModel, error)
+	CreateQuoteFromLead(ctx context.Context, leadID uuid.UUID, req *QuoteRequest) (*QuotesModel, error)
 	GetQuoteByID(ctx context.Context, id uuid.UUID) (*QuotesModel, error)
 	UpdateQuote(ctx context.Context, quoteID uuid.UUID, newQuote *QuoteRequest) (*QuotesModel, error)
 }

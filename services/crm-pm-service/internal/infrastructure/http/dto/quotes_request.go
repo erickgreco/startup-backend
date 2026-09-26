@@ -14,8 +14,10 @@ type CreateQuoteRequest struct {
 	ClientPhone                  string        `json:"client_phone_number" binding:"required"`
 	ProjectTitle                 string        `json:"project_title" binding:"required"`
 	ProjectDescription           string        `json:"project_description" binding:"required"`
+	ProjectResume                *string       `json:"project_resume,omitempty"`
 	ProjectEstimatedDurationDays int           `json:"project_estimated_duration_days" binding:"required"`
 	Items                        []ItemRequest `json:"items" binding:"required"`
+	FunctionalityExample         *string       `json:"functionality_example,omitempty"`
 	PaymentMethod                string        `json:"payment_method" binding:"required"`
 	Currency                     string        `json:"currency" binding:"required"`
 	Notes                        *string       `json:"notes,omitempty"`
@@ -44,8 +46,10 @@ func (r CreateQuoteRequest) ToDomain() (*domain.QuoteRequest, error) {
 		ClientPhone:                  r.ClientPhone,
 		ProjectTitle:                 r.ProjectTitle,
 		ProjectDescription:           r.ProjectDescription,
+		ProjectResume:                r.ProjectResume,
 		ProjectEstimatedDurationDays: r.ProjectEstimatedDurationDays,
 		Items:                        items,
+		FunctionalityExample:         r.FunctionalityExample,
 		PaymentMethod:                payMethod,
 		Currency:                     cur,
 		Notes:                        r.Notes,

@@ -21,7 +21,31 @@ func NewQuotesHandler(service domain.QuoteService) *QuotesHandler {
 	}
 }
 
-func (h *QuotesHandler) Create(c *gin.Context) {
+func (h *QuotesHandler) ManualCreate(c *gin.Context) {
+	var req dto.CreateQuoteRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Error("quote_handler_err", err)
+		response.BadRequest(c, ErrInvalidReqBody)
+		return
+	}
+
+	quoteReq, err := req.ToDomain()
+	if err != nil {
+		response.BadRequest(c, err)
+		return
+	}
+
+	created, err := h.service.CreateManualQuote(c.Request.Context(), quoteReq)
+	if err != nil {
+		mapDomainError(c, "failed_to_create_quote", err)
+		return
+	}
+
+	response.Created(c, dto.FromQuoteDomain(created))
+}
+
+func (h *QuotesHandler) CreateFromLead(c *gin.Context) {
 	var req dto.CreateQuoteRequest
 
 	idParam := c.Param("leadID")
@@ -43,7 +67,7 @@ func (h *QuotesHandler) Create(c *gin.Context) {
 		return
 	}
 
-	quote, err := h.service.CreateQuote(c.Request.Context(), id, quoteReq)
+	quote, err := h.service.CreateQuoteFromLead(c.Request.Context(), id, quoteReq)
 	if err != nil {
 		mapDomainError(c, "failed_to_create_quote", err)
 		return

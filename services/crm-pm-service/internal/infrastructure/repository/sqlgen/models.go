@@ -28,7 +28,7 @@ type Lead struct {
 
 type Quote struct {
 	ID                           uuid.UUID
-	LeadID                       uuid.UUID
+	LeadID                       *uuid.UUID
 	QuoteNumber                  string
 	ClientName                   string
 	ClientBusiness               *string

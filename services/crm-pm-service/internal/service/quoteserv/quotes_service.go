@@ -9,7 +9,6 @@ import (
 	"github.com/erickgreco/startup-backend/shared/idgen"
 	"github.com/erickgreco/startup-backend/shared/logger"
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 const (
@@ -28,9 +27,74 @@ func NewQuoteService(quoteRepo domain.QuoteRepository, leadRepo domain.LeadRepos
 	}
 }
 
-func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *domain.QuoteRequest) (*domain.QuotesModel, error) {
+func (s *QuoteService) CreateManualQuote(ctx context.Context, req *domain.QuoteRequest) (*domain.QuotesModel, error) {
+	if err := validateRequest(req); err != nil {
+		return nil, fmt.Errorf("quote_service: create_manual_quote: %w", err)
+	}
+
+	quoteID := idgen.NewID()
+	items := make([]domain.QuoteItem, len(req.Items))
+	totalSubtotal := domain.ZeroMoney
+	itemCreation := time.Now()
+
+	for i, item := range req.Items {
+		subtotal := item.UnitPrice.Mul(item.Quantity)
+
+		items[i] = domain.QuoteItem{
+			ID:          idgen.NewID(),
+			QuoteID:     quoteID,
+			Description: item.Description,
+			Quantity:    item.Quantity,
+			Unit:        item.Unit,
+			UnitPrice:   item.UnitPrice,
+			SubTotal:    subtotal,
+			SortOrder:   i,
+			CreatedAt:   itemCreation,
+		}
+
+		totalSubtotal = totalSubtotal.Add(subtotal)
+	}
+
+	quoteNumber := idgen.GenerateCode(quotePrefix, quoteID)
+
+	quote := &domain.QuotesModel{
+		ID:                           quoteID,
+		LeadID:                       nil,
+		QuoteNumber:                  quoteNumber,
+		ClientName:                   req.ClientName,
+		ClientBusiness:               req.ClientBusiness,
+		ClientEmail:                  req.ClientEmail,
+		ClientPhone:                  req.ClientPhone,
+		ProjectTitle:                 req.ProjectTitle,
+		ProjectDescription:           req.ProjectDescription,
+		ProjectResume:                req.ProjectResume,
+		ProjectEstimatedDurationDays: req.ProjectEstimatedDurationDays,
+		Items:                        items,
+		FunctionalityExample:         req.FunctionalityExample,
+		PaymentMethod:                req.PaymentMethod,
+		Status:                       domain.QuoteStatusDraft,
+		CreatedAt:                    time.Now(),
+		Subtotal:                     totalSubtotal, // ! Por ahora los campos son iguales, falta calcular taxes
+		Total:                        totalSubtotal, // ! Por ahora los campos son iguales, falta calcular taxes
+		Currency:                     req.Currency,
+		Notes:                        req.Notes,
+	}
+
+	created, err := s.quoteRepo.CreateQuote(ctx, quote)
+	if err != nil {
+		return nil, fmt.Errorf("quote_service: create_manual_quote: %w", err)
+	}
+
+	return created, nil
+}
+
+func (s *QuoteService) CreateQuoteFromLead(ctx context.Context, leadID uuid.UUID, req *domain.QuoteRequest) (*domain.QuotesModel, error) {
 	lead, err := s.leadRepo.GetLeadByID(ctx, leadID)
 	if err != nil {
+		return nil, fmt.Errorf("quote_service: create_quote: %w", err)
+	}
+
+	if err := validateRequest(req); err != nil {
 		return nil, fmt.Errorf("quote_service: create_quote: %w", err)
 	}
 
@@ -39,28 +103,12 @@ func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *d
 		logger.Warn("warning", "data_quality: %v", lead.DataQuality)
 	}
 
-	if req.ProjectEstimatedDurationDays < 1 || req.ProjectEstimatedDurationDays > 180 {
-		return nil, fmt.Errorf("quote_service: create_quote: %w", domain.ErrInvalidDuration)
-	}
-
-	if len(req.Items) == 0 {
-		return nil, fmt.Errorf("quote_service: create_quote: %w", domain.ErrMissingItems)
-	}
-
 	quoteID := idgen.NewID()
-
 	quoteItems := make([]domain.QuoteItem, len(req.Items))
 	totalSubtotal := domain.ZeroMoney
+	itemCreation := time.Now()
 
 	for i, item := range req.Items {
-		if item.Quantity.LessThanOrEqual(decimal.Zero) || item.UnitPrice.LessThanOrEqual(domain.ZeroMoney) {
-			return nil, fmt.Errorf("quote_service: create_quote: invalid_item: %d: %w", i, domain.ErrInvalidQuoteItem)
-		}
-
-		if item.UnitPrice.HasSubCentPrecision() {
-			return nil, fmt.Errorf("quote_service: create_quote: invalid_item: %d:%w", i, domain.ErrInvalidUnitPrice)
-		}
-
 		subtotal := item.UnitPrice.Mul(item.Quantity)
 
 		quoteItems[i] = domain.QuoteItem{
@@ -72,7 +120,7 @@ func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *d
 			UnitPrice:   item.UnitPrice,
 			SubTotal:    subtotal,
 			SortOrder:   i,
-			CreatedAt:   time.Now(),
+			CreatedAt:   itemCreation,
 		}
 
 		totalSubtotal = totalSubtotal.Add(subtotal)
@@ -82,7 +130,7 @@ func (s *QuoteService) CreateQuote(ctx context.Context, leadID uuid.UUID, req *d
 
 	quote := &domain.QuotesModel{
 		ID:                           quoteID,
-		LeadID:                       leadID,
+		LeadID:                       &leadID,
 		QuoteNumber:                  quoteNumber,
 		ClientName:                   req.ClientName,
 		ClientBusiness:               req.ClientBusiness,

@@ -43,7 +43,8 @@ func registerLeadsRoutes(rg *gin.RouterGroup, lh *handler.LeadsHandler) {
 func registerQuotesRoutes(rg *gin.RouterGroup, qh *handler.QuotesHandler) {
 	quotes := rg.Group("/quotes")
 	{
-		quotes.POST("/:leadID", qh.Create)
+		quotes.POST("/:leadID", qh.CreateFromLead)
+		quotes.POST("/create", qh.ManualCreate)
 		quotes.GET("/:id", qh.GetByID)
 		quotes.PUT("/update/:id", qh.UpdateDraft)
 	}

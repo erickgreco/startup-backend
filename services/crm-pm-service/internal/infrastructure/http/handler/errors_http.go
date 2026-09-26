@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TODO: cambiar forma en que trabajan los errores (sensitive data)
 var (
 	ErrInvalidReqBody     = errors.New("invalid_request_body")
 	ErrValidationFailed   = errors.New("validation_failed")
@@ -22,7 +21,7 @@ var (
 
 func mapDomainError(c *gin.Context, logMsg string, err error) {
 	switch {
-	case errors.Is(err, domain.ErrEmailAlreadyExists):
+	case errors.Is(err, domain.ErrAlreadyExists):
 		response.Conflict(c, err)
 	case errors.Is(err, domain.ErrInvalidSource), errors.Is(err, domain.ErrMissingRequiredFields):
 		response.BadRequest(c, err)

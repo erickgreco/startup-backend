@@ -11,10 +11,10 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
+// TODO: hay errores que se generan pero no estan siendo mapeados, pgerrcode tiene helpers como pgerrcode.IsDataException()
 var (
 	ErrTimeout         = errors.New("query_timed_out")
 	ErrInvalidData     = errors.New("invalid_data")
-	ErrNotFound        = errors.New("record_not_found")
 	ErrUniqueViolation = errors.New("unique_constraint_violation")
 )
 
@@ -41,10 +41,10 @@ func translateWriteError(err error) error {
 	mappedErr := mapWriteError(err)
 
 	if errors.Is(mappedErr, ErrUniqueViolation) {
-		return domain.ErrEmailAlreadyExists
+		return domain.ErrAlreadyExists
 	}
 	if errors.Is(mappedErr, ErrInvalidData) {
-		return domain.ErrInvalidData
+		return fmt.Errorf("%w: %w", domain.ErrInvalidData, mappedErr)
 	}
 	if errors.Is(mappedErr, ErrTimeout) {
 		return domain.ErrRepoTimeout
@@ -56,7 +56,7 @@ func translateWriteError(err error) error {
 // * Traduce errores de Postgres para operaciones de lectura (SELECT)
 func mapReadError(err error) error {
 	if errors.Is(err, pgx.ErrNoRows) {
-		return ErrNotFound
+		return domain.ErrNotFound
 	}
 
 	if errors.Is(err, context.DeadlineExceeded) {
@@ -70,7 +70,7 @@ func mapReadError(err error) error {
 func translateReadError(err error) error {
 	mappedErr := mapReadError(err)
 
-	if errors.Is(mappedErr, ErrNotFound) {
+	if errors.Is(mappedErr, domain.ErrNotFound) {
 		return domain.ErrNotFound
 	}
 	if errors.Is(mappedErr, ErrTimeout) {
@@ -80,16 +80,16 @@ func translateReadError(err error) error {
 	return fmt.Errorf("%w: %w", domain.ErrInternal, mappedErr)
 }
 
-// * UPDATE puede no encontrar filas ya que primero hace READ y despues WRITE
+// * UPDATE -> RETURNING sin filas coincidientes -> el scan de :one devuelve pgx.ErrNoRows
 func translateUpdateError(err error) error {
 	if errors.Is(err, pgx.ErrNoRows) {
-		return ErrNotFound
+		return domain.ErrNotFound
 	}
 
 	mappedErr := mapWriteError(err)
 
 	if errors.Is(mappedErr, ErrUniqueViolation) {
-		return domain.ErrEmailAlreadyExists
+		return domain.ErrAlreadyExists
 	}
 	if errors.Is(mappedErr, ErrInvalidData) {
 		return domain.ErrInvalidData

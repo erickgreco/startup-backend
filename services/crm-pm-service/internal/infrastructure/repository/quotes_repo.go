@@ -30,7 +30,7 @@ func (r *QuoteRepository) CreateQuote(ctx context.Context, quote *domain.QuotesM
 
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("quotes_repo: create_quote: begin_transaction: %w", err)
+		return nil, fmt.Errorf("quotes_repo: create_quote: begin_transaction: %w", translateWriteError(err))
 	}
 	defer tx.Rollback(ctx)
 
