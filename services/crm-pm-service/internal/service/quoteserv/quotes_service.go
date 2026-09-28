@@ -233,3 +233,20 @@ func (s *QuoteService) UpdateQuote(ctx context.Context, quoteID uuid.UUID, req *
 
 	return updated, nil
 }
+
+func (s *QuoteService) DeleteQuote(ctx context.Context, id uuid.UUID) error {
+	quote, err := s.quoteRepo.GetQuoteByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("quote_service: delete_quote: %w", err)
+	}
+
+	if quote.Status != domain.QuoteStatusDraft {
+		return domain.ErrUnableToDeleteQuote
+	}
+
+	if err := s.quoteRepo.DeleteQuote(ctx, id); err != nil {
+		return err
+	}
+
+	return nil
+}

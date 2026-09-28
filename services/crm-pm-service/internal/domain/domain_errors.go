@@ -23,4 +23,5 @@ var (
 	ErrInvalidProjectDuration = errors.New("invalid_project_duration")
 	ErrInvalidQuantity        = errors.New("item_quantity_required")
 	ErrInvalidStatusForUpdate = errors.New("quote_status_must_be_draft")
+	ErrUnableToDeleteQuote    = errors.New("unable_to_delete_quote")
 )

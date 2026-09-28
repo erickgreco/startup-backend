@@ -50,3 +50,7 @@ RETURNING *;
 -- name: DeleteQuoteItemsByQuoteID :execrows
 DELETE FROM quote_items
 WHERE quote_id = $1;
+
+-- name: DeleteQuote :execrows
+DELETE FROM quotes
+WHERE id = $1;

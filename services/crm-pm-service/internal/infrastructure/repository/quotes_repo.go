@@ -158,3 +158,19 @@ func (r *QuoteRepository) UpdateQuote(ctx context.Context, quote *domain.QuotesM
 
 	return updated, nil
 }
+
+func (r *QuoteRepository) DeleteQuote(ctx context.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
+	defer cancel()
+
+	affected, err := r.queries.DeleteQuote(ctx, id)
+	if err != nil {
+		return fmt.Errorf("quotes_repo: delete_quote: %w", translateWriteError(err))
+	}
+
+	if affected == 0 {
+		return domain.ErrNotFound
+	}
+
+	return nil
+}

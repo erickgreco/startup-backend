@@ -128,6 +128,7 @@ type QuoteRepository interface {
 	CreateQuote(ctx context.Context, quote *QuotesModel) (*QuotesModel, error)
 	GetQuoteByID(ctx context.Context, id uuid.UUID) (*QuotesModel, error)
 	UpdateQuote(ctx context.Context, quote *QuotesModel) (*QuotesModel, error)
+	DeleteQuote(ctx context.Context, id uuid.UUID) error
 }
 
 type QuoteService interface {
@@ -135,4 +136,5 @@ type QuoteService interface {
 	CreateQuoteFromLead(ctx context.Context, leadID uuid.UUID, req *QuoteRequest) (*QuotesModel, error)
 	GetQuoteByID(ctx context.Context, id uuid.UUID) (*QuotesModel, error)
 	UpdateQuote(ctx context.Context, quoteID uuid.UUID, newQuote *QuoteRequest) (*QuotesModel, error)
+	DeleteQuote(ctx context.Context, id uuid.UUID) error
 }

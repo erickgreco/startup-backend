@@ -1,0 +1,16 @@
+info:
+  name: quotes-DeleteDraft
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: "{{baseURL}}/quotes/{{quote_id}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

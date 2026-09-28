@@ -107,6 +107,23 @@ func (q *Queries) CreateQuote(ctx context.Context, arg CreateQuoteParams) (Quote
 	return i, err
 }
 
+const deleteQuote = `-- name: DeleteQuote :execrows
+DELETE FROM quotes
+WHERE id = $1
+`
+
+// DeleteQuote
+//
+//	DELETE FROM quotes
+//	WHERE id = $1
+func (q *Queries) DeleteQuote(ctx context.Context, id uuid.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteQuote, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const deleteQuoteItemsByQuoteID = `-- name: DeleteQuoteItemsByQuoteID :execrows
 DELETE FROM quote_items
 WHERE quote_id = $1

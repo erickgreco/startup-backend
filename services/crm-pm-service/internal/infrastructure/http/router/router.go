@@ -47,5 +47,6 @@ func registerQuotesRoutes(rg *gin.RouterGroup, qh *handler.QuotesHandler) {
 		quotes.POST("/create", qh.ManualCreate)
 		quotes.GET("/:id", qh.GetByID)
 		quotes.PUT("/update/:id", qh.UpdateDraft)
+		quotes.DELETE("/:id", qh.Delete)
 	}
 }
