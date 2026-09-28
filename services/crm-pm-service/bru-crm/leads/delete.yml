@@ -1,10 +1,10 @@
 info:
-  name: leads-getByID
+  name: leads-delete
   type: http
-  seq: 4
+  seq: 2
 
 http:
-  method: GET
+  method: DELETE
   url: "{{baseURL}}/leads/{{lead_id}}"
   auth: inherit
 

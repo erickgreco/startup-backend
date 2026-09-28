@@ -1,0 +1,7 @@
+info:
+  name: leads
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit

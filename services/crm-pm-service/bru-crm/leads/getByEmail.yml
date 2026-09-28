@@ -1,11 +1,15 @@
 info:
-  name: leads-delete
+  name: leads-getByEmail
   type: http
-  seq: 7
+  seq: 2
 
 http:
-  method: DELETE
-  url: "{{baseURL}}/leads/{{lead_id}}"
+  method: GET
+  url: "{{baseURL}}/leads?email={{email}}"
+  params:
+    - name: email
+      value: "{{email}}"
+      type: query
   auth: inherit
 
 settings:
