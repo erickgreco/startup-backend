@@ -14,7 +14,7 @@ type Currency struct {
 func ParseCurrency(code string) (Currency, error) {
 	u, err := currency.ParseISO(code)
 	if err != nil {
-		return Currency{}, fmt.Errorf("invalid_currency %q: %w", code, err)
+		return Currency{}, fmt.Errorf("%w - %q: %w", ErrInvalidCurrency, code, err)
 	}
 
 	return Currency{unit: u}, nil
@@ -36,7 +36,7 @@ func (c *Currency) Scan(src any) error {
 
 	u, err := currency.ParseISO(s)
 	if err != nil {
-		return fmt.Errorf("invalid_currency %q from_db: %w", s, err)
+		return fmt.Errorf("%w - %q from_db: %w", ErrInvalidCurrency, s, err)
 	}
 
 	c.unit = u

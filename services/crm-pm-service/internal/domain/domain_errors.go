@@ -29,4 +29,5 @@ var (
 	ErrInvalidEmail           = errors.New("invalid_email")
 	ErrInvalidPhoneNumber     = errors.New("invalid_phone_number")
 	ErrInvalidLanguage        = errors.New("invalid_language")
+	ErrInvalidCurrency        = errors.New("invalid_currency_type")
 )
