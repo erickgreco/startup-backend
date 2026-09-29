@@ -10,9 +10,10 @@ import (
 // Agrupa todos los handlers del servicio. Cuando se agregue un recurso nuevo
 // (contracts, deals, etc) solo se agrega un campo aqui
 type Handlers struct {
-	Health *handler.HealthHandler
-	Leads  *handler.LeadsHandler
-	Quotes *handler.QuotesHandler
+	Health      *handler.HealthHandler
+	Leads       *handler.LeadsHandler
+	Quotes      *handler.QuotesHandler
+	UserProfile *handler.UserProfileHandler
 	// Contracts *handler.ContractsHandler	ejemplo
 }
 
@@ -25,6 +26,7 @@ func Setup(r *gin.Engine, h *Handlers) {
 	{
 		registerLeadsRoutes(api, h.Leads)
 		registerQuotesRoutes(api, h.Quotes)
+		registerUserProfileRoutes(api, h.UserProfile)
 		// registerContractsRoutes(api, h.Contracts)	ejemplo
 	}
 }
@@ -48,5 +50,12 @@ func registerQuotesRoutes(rg *gin.RouterGroup, qh *handler.QuotesHandler) {
 		quotes.GET("/:id", qh.GetByID)
 		quotes.PUT("/update/:id", qh.UpdateDraft)
 		quotes.DELETE("/:id", qh.Delete)
+	}
+}
+
+func registerUserProfileRoutes(rg *gin.RouterGroup, uph *handler.UserProfileHandler) {
+	upRoutes := rg.Group("/user-profile")
+	{
+		upRoutes.POST("/create", uph.Create)
 	}
 }

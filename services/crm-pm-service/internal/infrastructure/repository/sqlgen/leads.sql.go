@@ -18,7 +18,7 @@ INSERT INTO leads (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 )
-RETURNING id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name
+RETURNING id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
 `
 
 type CreateLeadParams struct {
@@ -42,7 +42,7 @@ type CreateLeadParams struct {
 //	) VALUES (
 //	    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 //	)
-//	RETURNING id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name
+//	RETURNING id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
 func (q *Queries) CreateLead(ctx context.Context, arg CreateLeadParams) (Lead, error) {
 	row := q.db.QueryRow(ctx, createLead,
 		arg.ID,
@@ -60,16 +60,16 @@ func (q *Queries) CreateLead(ctx context.Context, arg CreateLeadParams) (Lead, e
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.BusinessName,
+		&i.PhoneNumber,
 		&i.Email,
 		&i.Message,
+		&i.DataQuality,
+		&i.QualityScore,
 		&i.Status,
 		&i.Source,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DataQuality,
-		&i.QualityScore,
-		&i.PhoneNumber,
-		&i.BusinessName,
 	)
 	return i, err
 }
@@ -92,13 +92,13 @@ func (q *Queries) DeleteLead(ctx context.Context, id uuid.UUID) (int64, error) {
 }
 
 const getLeadByID = `-- name: GetLeadByID :one
-SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
+SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at FROM leads
 WHERE id = $1
 `
 
 // GetLeadByID
 //
-//	SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
+//	SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at FROM leads
 //	WHERE id = $1
 func (q *Queries) GetLeadByID(ctx context.Context, id uuid.UUID) (Lead, error) {
 	row := q.db.QueryRow(ctx, getLeadByID, id)
@@ -106,29 +106,29 @@ func (q *Queries) GetLeadByID(ctx context.Context, id uuid.UUID) (Lead, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.BusinessName,
+		&i.PhoneNumber,
 		&i.Email,
 		&i.Message,
+		&i.DataQuality,
+		&i.QualityScore,
 		&i.Status,
 		&i.Source,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DataQuality,
-		&i.QualityScore,
-		&i.PhoneNumber,
-		&i.BusinessName,
 	)
 	return i, err
 }
 
 const getLeadsByEmail = `-- name: GetLeadsByEmail :many
-SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
+SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at FROM leads
 WHERE email = $1
 ORDER BY created_at DESC
 `
 
 // GetLeadsByEmail
 //
-//	SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
+//	SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at FROM leads
 //	WHERE email = $1
 //	ORDER BY created_at DESC
 func (q *Queries) GetLeadsByEmail(ctx context.Context, email string) ([]Lead, error) {
@@ -143,16 +143,16 @@ func (q *Queries) GetLeadsByEmail(ctx context.Context, email string) ([]Lead, er
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.BusinessName,
+			&i.PhoneNumber,
 			&i.Email,
 			&i.Message,
+			&i.DataQuality,
+			&i.QualityScore,
 			&i.Status,
 			&i.Source,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DataQuality,
-			&i.QualityScore,
-			&i.PhoneNumber,
-			&i.BusinessName,
 		); err != nil {
 			return nil, err
 		}
@@ -165,14 +165,14 @@ func (q *Queries) GetLeadsByEmail(ctx context.Context, email string) ([]Lead, er
 }
 
 const getLeadsByStatus = `-- name: GetLeadsByStatus :many
-SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
+SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at FROM leads
 WHERE status = $1
 ORDER BY created_at DESC
 `
 
 // GetLeadsByStatus
 //
-//	SELECT id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name FROM leads
+//	SELECT id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at FROM leads
 //	WHERE status = $1
 //	ORDER BY created_at DESC
 func (q *Queries) GetLeadsByStatus(ctx context.Context, status string) ([]Lead, error) {
@@ -187,16 +187,16 @@ func (q *Queries) GetLeadsByStatus(ctx context.Context, status string) ([]Lead, 
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.BusinessName,
+			&i.PhoneNumber,
 			&i.Email,
 			&i.Message,
+			&i.DataQuality,
+			&i.QualityScore,
 			&i.Status,
 			&i.Source,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DataQuality,
-			&i.QualityScore,
-			&i.PhoneNumber,
-			&i.BusinessName,
 		); err != nil {
 			return nil, err
 		}
@@ -212,7 +212,7 @@ const updateLeadStatus = `-- name: UpdateLeadStatus :one
 UPDATE leads
 SET status = $1
 WHERE id = $2
-RETURNING id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name
+RETURNING id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
 `
 
 // UpdateLeadStatus
@@ -220,23 +220,23 @@ RETURNING id, name, email, message, status, source, created_at, updated_at, data
 //	UPDATE leads
 //	SET status = $1
 //	WHERE id = $2
-//	RETURNING id, name, email, message, status, source, created_at, updated_at, data_quality, quality_score, phone_number, business_name
+//	RETURNING id, name, business_name, phone_number, email, message, data_quality, quality_score, status, source, created_at, updated_at
 func (q *Queries) UpdateLeadStatus(ctx context.Context, status string, leadID uuid.UUID) (Lead, error) {
 	row := q.db.QueryRow(ctx, updateLeadStatus, status, leadID)
 	var i Lead
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.BusinessName,
+		&i.PhoneNumber,
 		&i.Email,
 		&i.Message,
+		&i.DataQuality,
+		&i.QualityScore,
 		&i.Status,
 		&i.Source,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DataQuality,
-		&i.QualityScore,
-		&i.PhoneNumber,
-		&i.BusinessName,
 	)
 	return i, err
 }

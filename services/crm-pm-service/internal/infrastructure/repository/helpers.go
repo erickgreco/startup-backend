@@ -155,3 +155,47 @@ func quoteDomainToGenUpdate(quote *domain.QuotesModel) sqlgen.UpdateQuoteParams 
 		ID:                           quote.ID,
 	}
 }
+
+func userProfileDomainToGen(up *domain.UserProfileModel) sqlgen.CreateUserProfileParams {
+	return sqlgen.CreateUserProfileParams{
+		ID:              up.ID,
+		FirstName:       up.FirstName,
+		LastName:        up.LastName,
+		Email:           up.Email,
+		PhoneNumber:     up.PhoneNumber,
+		ProfileImageUrl: up.ProfileImageURL,
+		BusinessName:    up.BusinessName,
+		Industry:        up.Industry,
+		LogoUrl:         up.LogoURL,
+		DefaultCurrency: up.DefaultCurrency.String(),
+		Timezone:        up.Timezone,
+		Language:        up.Language,
+		WebsiteUrl:      up.WebsiteURL,
+		CreatedAt:       up.CreatedAt,
+	}
+}
+
+func genToUserProfileDomain(row sqlgen.UserProfile) (*domain.UserProfileModel, error) {
+	currency, err := domain.ParseCurrency(row.DefaultCurrency)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.UserProfileModel{
+		ID:              row.ID,
+		FirstName:       row.FirstName,
+		LastName:        row.LastName,
+		Email:           row.Email,
+		PhoneNumber:     row.PhoneNumber,
+		ProfileImageURL: row.ProfileImageUrl,
+		BusinessName:    row.BusinessName,
+		Industry:        row.Industry,
+		LogoURL:         row.LogoUrl,
+		DefaultCurrency: currency,
+		Timezone:        row.Timezone,
+		Language:        row.Language,
+		WebsiteURL:      row.WebsiteUrl,
+		CreatedAt:       row.CreatedAt,
+		UpdatedAt:       row.UpdatedAt,
+	}, nil
+}

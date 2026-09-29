@@ -14,16 +14,16 @@ import (
 type Lead struct {
 	ID           uuid.UUID
 	Name         string
+	BusinessName string
+	PhoneNumber  string
 	Email        string
 	Message      string
+	DataQuality  string
+	QualityScore float64
 	Status       string
 	Source       string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	DataQuality  string
-	QualityScore float64
-	PhoneNumber  string
-	BusinessName string
 }
 
 type Quote struct {
@@ -64,4 +64,22 @@ type QuoteItem struct {
 	SortOrder   int32
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type UserProfile struct {
+	ID              uuid.UUID
+	FirstName       string
+	LastName        string
+	Email           string
+	PhoneNumber     string
+	ProfileImageUrl *string
+	BusinessName    *string
+	Industry        string
+	LogoUrl         *string
+	DefaultCurrency string
+	Timezone        string
+	Language        string
+	WebsiteUrl      *string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/infrastructure/repository"
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/service/leadserv"
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/service/quoteserv"
+	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/service/userserv"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -53,9 +54,14 @@ func (s *Server) buildHandlers() *router.Handlers {
 	var quotesSrv domain.QuoteService = quoteserv.NewQuoteService(quotesRepo, leadsRepo)
 	quotesHandler := handler.NewQuotesHandler(quotesSrv)
 
+	var userProfileRepo domain.UserProfileRepository = repository.NewUserProfileRepository(s.db)
+	var userProfileServ domain.UserProfileService = userserv.NewUserProfileService(userProfileRepo)
+	userProfileHandler := handler.NewUserProfileHandler(userProfileServ)
+
 	return &router.Handlers{
-		Leads:  leadsHandler,
-		Quotes: quotesHandler,
+		Leads:       leadsHandler,
+		Quotes:      quotesHandler,
+		UserProfile: userProfileHandler,
 	}
 }
 
