@@ -24,45 +24,31 @@ type QuoteRequest struct {
 }
 
 type QuotesModel struct {
-	ID          uuid.UUID
-	LeadID      *uuid.UUID
-	QuoteNumber string
-
-	// Client data
-	ClientName     string
-	ClientBusiness *string
-	ClientEmail    string
-	ClientPhone    string
-
-	// Project data
+	ID                           uuid.UUID
+	LeadID                       *uuid.UUID
+	QuoteNumber                  string
+	ClientName                   string
+	ClientBusiness               *string
+	ClientEmail                  string
+	ClientPhone                  string
 	ProjectTitle                 string
 	ProjectDescription           string
 	ProjectResume                *string
 	ProjectEstimatedDurationDays int
-
-	// Detalles de la oferta
-	FunctionalityExample *string
-	Items                []QuoteItem // ** deliverable
-	PaymentMethod        PayMethod
-
-	// Estados y fechas
-	Status     QuoteStatus
-	CreatedAt  time.Time
-	ValidUntil *time.Time // ** cuenta a partir de cuando se envia
-	SentAt     *time.Time
-	AcceptedAt *time.Time
-	RejectedAt *time.Time
-
-	// Totales
-	Subtotal Money
-	Total    Money
-
-	// Metadata
-	Currency Currency
-	Notes    *string
-
-	// Auditoria
-	UpdatedAt time.Time
+	FunctionalityExample         *string
+	Items                        []QuoteItem
+	PaymentMethod                PayMethod
+	Status                       QuoteStatus
+	CreatedAt                    time.Time
+	ValidUntil                   *time.Time
+	SentAt                       *time.Time
+	AcceptedAt                   *time.Time
+	RejectedAt                   *time.Time
+	Subtotal                     Money
+	Total                        Money
+	Currency                     Currency
+	Notes                        *string
+	UpdatedAt                    time.Time
 }
 
 type PayMethod string
