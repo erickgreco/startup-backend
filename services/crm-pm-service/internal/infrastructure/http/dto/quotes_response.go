@@ -21,7 +21,7 @@ type QuoteResponse struct {
 	ProjectTitle                 string             `json:"project_title"`
 	ProjectDescription           string             `json:"project_description"`
 	ProjectResume                *string            `json:"project_resume"`
-	ProjectEstimatedDurationDays int                `json:"project_estimated_duration_days"`
+	ProjectEstimatedDurationDays int32              `json:"project_estimated_duration_days"`
 	FunctionalityExample         *string            `json:"functionality_example"`
 	Items                        []ItemResponse     `json:"items"`
 	PaymentMethod                domain.PayMethod   `json:"payment_method"`

@@ -41,7 +41,7 @@ func NewLocalLeadAnalyzer() *LocalLeadAnalyzer {
 		keywordsPath = "./data/keywords.json"
 	}
 
-	kw, err := loadKeywords("./data/keywords.json")
+	kw, err := loadKeywords(keywordsPath)
 	if err != nil {
 		panic(fmt.Sprintf("FATAL: failed_to_load_keywords_from %s: %v", keywordsPath, err))
 	}
@@ -59,7 +59,7 @@ func NewLocalLeadAnalyzer() *LocalLeadAnalyzer {
 }
 
 func loadKeywords(filePath string) (*keywords, error) {
-	file, err := os.Open(filePath)
+	file, err := os.Open(filePath) //nolint:gosec // G304: path from env config (KEYWORDS_PATH), not user input
 	if err != nil {
 		return nil, fmt.Errorf("failed_to_open_keywords_file: %w", err)
 	}

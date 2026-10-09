@@ -52,19 +52,19 @@ func TestMain(m *testing.M) {
 
 	dsn, err := container.ConnectionString(ctx, "sslmode=disable")
 	if err != nil {
-		testcontainers.TerminateContainer(container) //nolint:errcheck // best-effort cleanup in TestMain
+		testcontainers.TerminateContainer(container) //nolint:errcheck,gosec // best-effort cleanup in TestMain
 		log.Fatalf("failed_to_build_dsn: %v", err)
 	}
 
 	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
-		testcontainers.TerminateContainer(container) //nolint:errcheck // best-effort cleanup in TestMain
+		testcontainers.TerminateContainer(container) //nolint:errcheck,gosec // best-effort cleanup in TestMain
 		log.Fatalf("failed_to_create_pool: %v", err)
 	}
 
 	if err := applyMigrations(ctx, pool); err != nil {
 		pool.Close()
-		testcontainers.TerminateContainer(container) //nolint:errcheck // best-effort cleanup in TestMain
+		testcontainers.TerminateContainer(container) //nolint:errcheck,gosec // best-effort cleanup in TestMain
 		log.Fatalf("failed_to_apply_migrations: %v", err)
 	}
 
@@ -73,7 +73,7 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	pool.Close()
-	testcontainers.TerminateContainer(container) //nolint:errcheck // best-effort cleanup in TestMain
+	testcontainers.TerminateContainer(container) //nolint:errcheck,gosec // best-effort cleanup in TestMain
 
 	os.Exit(code)
 }
@@ -98,7 +98,7 @@ func applyMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 	}
 
 	for _, name := range names {
-		raw, err := os.ReadFile(filepath.Join(migrationsDir, name))
+		raw, err := os.ReadFile(filepath.Join(migrationsDir, name)) //nolint:gosec // G304: path from const + sorted dir entries, not user input
 		if err != nil {
 			return fmt.Errorf("read_migration %s: %w", name, err)
 		}

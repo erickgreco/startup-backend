@@ -15,7 +15,7 @@ type QuoteRequest struct {
 	ProjectTitle                 string
 	ProjectDescription           string
 	ProjectResume                *string
-	ProjectEstimatedDurationDays int
+	ProjectEstimatedDurationDays int32
 	FunctionalityExample         *string
 	Items                        []ItemRequest
 	PaymentMethod                PayMethod
@@ -34,7 +34,7 @@ type QuotesModel struct {
 	ProjectTitle                 string
 	ProjectDescription           string
 	ProjectResume                *string
-	ProjectEstimatedDurationDays int
+	ProjectEstimatedDurationDays int32
 	FunctionalityExample         *string
 	Items                        []QuoteItem
 	PaymentMethod                PayMethod
