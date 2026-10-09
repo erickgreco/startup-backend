@@ -27,7 +27,10 @@ func New(db *pgxpool.Pool, cfg *config.Config) *Server {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	r.SetTrustedProxies(nil)
+
+	// nil disables proxy trust
+	// Cannot fail: Gin returns nil for a nil/empty list; errors only occur with invalid CIDRs
+	_ = r.SetTrustedProxies(nil)
 
 	s := &Server{
 		router: r,

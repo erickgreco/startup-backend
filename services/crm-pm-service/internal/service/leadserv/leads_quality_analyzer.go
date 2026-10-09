@@ -63,7 +63,7 @@ func loadKeywords(filePath string) (*keywords, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed_to_open_keywords_file: %w", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck // read-only file; Close error is not actionable
 
 	var kw keywords
 	if err := json.NewDecoder(file).Decode(&kw); err != nil {
