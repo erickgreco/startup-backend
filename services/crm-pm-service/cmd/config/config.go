@@ -1,10 +1,12 @@
 package config
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
 	"strings"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -23,8 +25,6 @@ type Config struct {
 }
 
 func Load() *Config {
-	godotenv.Load()
-
 	viper.SetDefault("PORT", "8081")
 	viper.SetDefault("DB_URL", "")
 	viper.SetDefault("GIN_MODE", "debug")
@@ -38,6 +38,15 @@ func Load() *Config {
 
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	viper.SetConfigFile(".env")
+	viper.SetConfigType("env")
+
+	// TODO: Cuando viper publique v2 con FileLookupError migrar a
+	// errors.As(err, new(viper.FileLookupError))
+	if err := viper.ReadInConfig(); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		panic(fmt.Errorf("error reading .env: %w", err))
+	}
 
 	return &Config{
 		Port:                    ":" + viper.GetString("PORT"),
