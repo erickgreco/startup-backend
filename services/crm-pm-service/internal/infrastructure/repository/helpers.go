@@ -99,7 +99,7 @@ func genToQuoteDomain(row sqlgen.Quote, items []sqlgen.QuoteItem) (*domain.Quote
 		ProjectTitle:                 row.ProjectTitle,
 		ProjectDescription:           row.ProjectDescription,
 		ProjectResume:                row.ProjectResume,
-		ProjectEstimatedDurationDays: int(row.ProjectEstimatedDurationDays),
+		ProjectEstimatedDurationDays: row.ProjectEstimatedDurationDays,
 		FunctionalityExample:         row.FunctionalityExample,
 		Items:                        genItemsToDomain(items),
 		PaymentMethod:                domain.PayMethod(row.PaymentMethod),

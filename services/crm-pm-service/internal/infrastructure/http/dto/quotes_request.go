@@ -15,7 +15,7 @@ type CreateQuoteRequest struct {
 	ProjectTitle                 string        `json:"project_title" binding:"required"`
 	ProjectDescription           string        `json:"project_description" binding:"required"`
 	ProjectResume                *string       `json:"project_resume,omitempty"`
-	ProjectEstimatedDurationDays int           `json:"project_estimated_duration_days" binding:"required"`
+	ProjectEstimatedDurationDays int32         `json:"project_estimated_duration_days" binding:"required"`
 	Items                        []ItemRequest `json:"items" binding:"required"`
 	FunctionalityExample         *string       `json:"functionality_example,omitempty"`
 	PaymentMethod                string        `json:"payment_method" binding:"required"`
