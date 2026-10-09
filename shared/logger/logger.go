@@ -22,7 +22,6 @@ func Init(level string) {
 func Info(msg string, args ...any)  { l.Info(msg, args...) }
 func Debug(msg string, args ...any) { l.Debug(msg, args...) }
 func Warn(msg string, args ...any)  { l.Warn(msg, args...) }
-func Error(msg string, err error, args ...any) error {
+func Error(msg string, err error, args ...any) {
 	l.Error(msg, append([]any{"err", err}, args...)...)
-	return err
 }

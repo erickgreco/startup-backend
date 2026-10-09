@@ -52,19 +52,19 @@ func TestMain(m *testing.M) {
 
 	dsn, err := container.ConnectionString(ctx, "sslmode=disable")
 	if err != nil {
-		testcontainers.TerminateContainer(container)
+		testcontainers.TerminateContainer(container) //nolint:errcheck // best-effort cleanup in TestMain
 		log.Fatalf("failed_to_build_dsn: %v", err)
 	}
 
 	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
-		testcontainers.TerminateContainer(container)
+		testcontainers.TerminateContainer(container) //nolint:errcheck // best-effort cleanup in TestMain
 		log.Fatalf("failed_to_create_pool: %v", err)
 	}
 
 	if err := applyMigrations(ctx, pool); err != nil {
 		pool.Close()
-		testcontainers.TerminateContainer(container)
+		testcontainers.TerminateContainer(container) //nolint:errcheck // best-effort cleanup in TestMain
 		log.Fatalf("failed_to_apply_migrations: %v", err)
 	}
 
@@ -73,7 +73,7 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	pool.Close()
-	testcontainers.TerminateContainer(container)
+	testcontainers.TerminateContainer(container) //nolint:errcheck // best-effort cleanup in TestMain
 
 	os.Exit(code)
 }
@@ -161,11 +161,6 @@ func newTestRepo(t *testing.T) (*QuoteRepository, context.Context) {
 	return NewQuotesRepository(testPool), ctx
 }
 
-//go:fix inline
-func ptr[T any](v T) *T {
-	return new(v)
-}
-
 func testCurrency(t *testing.T) domain.Currency {
 	t.Helper()
 
@@ -239,14 +234,14 @@ func newTestQuote(t *testing.T) *domain.QuotesModel {
 		LeadID:                       nil, // ** cotizacion manual
 		QuoteNumber:                  "Q-2026-" + id.String()[:8],
 		ClientName:                   "Erick Gutierrez",
-		ClientBusiness:               ptr("Greco Labs"),
+		ClientBusiness:               new("Greco Labs"),
 		ClientEmail:                  "test@test.com",
 		ClientPhone:                  "5512345678",
 		ProjectTitle:                 "Test Project",
 		ProjectDescription:           "Test description",
-		ProjectResume:                ptr("Resumen del proyecto"),
+		ProjectResume:                new("Resumen del proyecto"),
 		ProjectEstimatedDurationDays: 30,
-		FunctionalityExample:         ptr("https://example.com/demo"),
+		FunctionalityExample:         new("https://example.com/demo"),
 		Items:                        items,
 		PaymentMethod:                domain.PaymentUpfront,
 		Status:                       domain.QuoteStatusDraft,
@@ -254,7 +249,7 @@ func newTestQuote(t *testing.T) *domain.QuotesModel {
 		Subtotal:                     domain.FromCents(125000),
 		Total:                        domain.FromCents(125000),
 		Currency:                     testCurrency(t),
-		Notes:                        ptr("Sin notas"),
+		Notes:                        new("Sin notas"),
 	}
 }
 
@@ -403,7 +398,7 @@ func TestCreateQuote_TableDriven(t *testing.T) {
 		{
 			name: "unknown lead id should fail",
 			mutate: func(_ *testing.T, _ context.Context, quote *domain.QuotesModel) {
-				quote.LeadID = ptr(uuid.New())
+				quote.LeadID = new(uuid.New())
 			},
 			wantErr: domain.ErrInvalidData,
 		},
@@ -543,7 +538,7 @@ func TestUpdateQuote(t *testing.T) {
 	updated.ClientName = "Cliente Actualizado"
 	updated.ProjectTitle = "Proyecto Actualizado"
 	updated.PaymentMethod = domain.PaymentMilestone
-	updated.Notes = ptr("Notas actualizadas")
+	updated.Notes = new("Notas actualizadas")
 	updated.Subtotal = domain.FromCents(300000)
 	updated.Total = domain.FromCents(300000)
 	updated.Items = []domain.QuoteItem{

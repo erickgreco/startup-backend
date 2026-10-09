@@ -32,7 +32,7 @@ func (r *QuoteRepository) CreateQuote(ctx context.Context, quote *domain.QuotesM
 	if err != nil {
 		return nil, fmt.Errorf("quotes_repo: create_quote: begin_transaction: %w", translateWriteError(err))
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback(ctx) //nolint:errcheck // Rollback after Commit returns pgx.TxClosed; expected
 
 	qtx := r.queries.WithTx(tx)
 
@@ -106,7 +106,7 @@ func (r *QuoteRepository) UpdateQuote(ctx context.Context, quote *domain.QuotesM
 	if err != nil {
 		return nil, fmt.Errorf("quotes_repo: update_quote: begin_transaction: %w", translateWriteError(err))
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback(ctx) //nolint:errcheck // Rollback after Commit returns pgx.TxClosed; expected
 
 	qtx := r.queries.WithTx(tx)
 
