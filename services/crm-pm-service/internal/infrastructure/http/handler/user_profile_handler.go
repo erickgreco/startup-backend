@@ -23,6 +23,7 @@ func (h *UserProfileHandler) Create(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("user_profile_handler", err)
+		response.BadRequest(c, ErrInvalidReqBody)
 		return
 	}
 

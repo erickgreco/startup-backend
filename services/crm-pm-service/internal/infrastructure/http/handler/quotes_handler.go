@@ -105,6 +105,7 @@ func (h *QuotesHandler) UpdateDraft(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("quote_handler_err", err)
+		response.BadRequest(c, ErrInvalidReqBody)
 		return
 	}
 
