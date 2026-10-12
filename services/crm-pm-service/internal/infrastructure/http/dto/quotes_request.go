@@ -36,7 +36,12 @@ func (r CreateQuoteRequest) ToDomain() (*domain.QuoteRequest, error) {
 
 	items := make([]domain.ItemRequest, len(r.Items))
 	for i, item := range r.Items {
-		items[i] = item.itemToDomain()
+		iDom, err := item.itemToDomain()
+		if err != nil {
+			return nil, fmt.Errorf("dto: items[%d]: %w", i, err)
+		}
+
+		items[i] = *iDom
 	}
 
 	return &domain.QuoteRequest{
@@ -57,17 +62,27 @@ func (r CreateQuoteRequest) ToDomain() (*domain.QuoteRequest, error) {
 }
 
 type ItemRequest struct {
-	Description string          `json:"description" binding:"required"`
-	Quantity    decimal.Decimal `json:"quantity" binding:"required"`
-	Unit        string          `json:"unit" binding:"required"`
-	UnitPrice   decimal.Decimal `json:"unit_price" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Quantity    string `json:"quantity" binding:"required"`
+	Unit        string `json:"unit" binding:"required"`
+	UnitPrice   string `json:"unit_price" binding:"required"`
 }
 
-func (i ItemRequest) itemToDomain() domain.ItemRequest {
-	return domain.ItemRequest{
-		Description: i.Description,
-		Quantity:    i.Quantity,
-		Unit:        i.Unit,
-		UnitPrice:   domain.Money(i.UnitPrice),
+func (i ItemRequest) itemToDomain() (*domain.ItemRequest, error) {
+	qty, err := decimal.NewFromString(i.Quantity)
+	if err != nil {
+		return nil, fmt.Errorf("dto: invalid_quantity: %q: %w", i.Quantity, err)
 	}
+
+	price, err := domain.ParseMoney(i.UnitPrice)
+	if err != nil {
+		return nil, fmt.Errorf("dto: invalid_unit_price: %w", err)
+	}
+
+	return &domain.ItemRequest{
+		Description: i.Description,
+		Quantity:    qty,
+		Unit:        i.Unit,
+		UnitPrice:   price,
+	}, nil
 }
