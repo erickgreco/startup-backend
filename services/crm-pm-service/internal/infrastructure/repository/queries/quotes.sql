@@ -54,3 +54,11 @@ WHERE quote_id = $1;
 -- name: DeleteQuote :execrows
 DELETE FROM quotes
 WHERE id = $1;
+
+-- name: SendQuote :execrows
+UPDATE quotes
+SET status = 'sent',
+    sent_at = @sent_at,
+    valid_until = @valid_until
+WHERE id = @quote_id
+    AND status = 'draft';

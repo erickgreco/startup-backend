@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/domain"
 	"github.com/erickgreco/startup-backend/services/crm-pm-service/internal/infrastructure/repository/sqlgen"
@@ -170,6 +171,26 @@ func (r *QuoteRepository) DeleteQuote(ctx context.Context, id uuid.UUID) error {
 
 	if affected == 0 {
 		return domain.ErrNotFound
+	}
+
+	return nil
+}
+
+func (r *QuoteRepository) SendQuote(ctx context.Context, quoteID uuid.UUID, sentAt, validUntil time.Time) error {
+	ctx, cancel := context.WithTimeout(ctx, queryTimeDuration)
+	defer cancel()
+
+	affected, err := r.queries.SendQuote(ctx, sqlgen.SendQuoteParams{
+		SentAt:     &sentAt,
+		ValidUntil: &validUntil,
+		QuoteID:    quoteID,
+	})
+	if err != nil {
+		return fmt.Errorf("quotes_repo: send_quote: %w", translateUpdateError(err))
+	}
+
+	if affected == 0 {
+		return fmt.Errorf("quotes_repo: send_quote: %w", domain.ErrInvalidStatusTransition)
 	}
 
 	return nil

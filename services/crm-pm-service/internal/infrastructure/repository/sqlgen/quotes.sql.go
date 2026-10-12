@@ -224,6 +224,37 @@ func (q *Queries) ListQuoteItemsByQuoteID(ctx context.Context, quoteID uuid.UUID
 	return items, nil
 }
 
+const sendQuote = `-- name: SendQuote :execrows
+UPDATE quotes
+SET status = 'sent',
+    sent_at = $1,
+    valid_until = $2
+WHERE id = $3
+    AND status = 'draft'
+`
+
+type SendQuoteParams struct {
+	SentAt     *time.Time
+	ValidUntil *time.Time
+	QuoteID    uuid.UUID
+}
+
+// SendQuote
+//
+//	UPDATE quotes
+//	SET status = 'sent',
+//	    sent_at = $1,
+//	    valid_until = $2
+//	WHERE id = $3
+//	    AND status = 'draft'
+func (q *Queries) SendQuote(ctx context.Context, arg SendQuoteParams) (int64, error) {
+	result, err := q.db.Exec(ctx, sendQuote, arg.SentAt, arg.ValidUntil, arg.QuoteID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const updateQuote = `-- name: UpdateQuote :one
 UPDATE quotes
 SET

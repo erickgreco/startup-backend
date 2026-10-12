@@ -7,6 +7,28 @@ import (
 	"github.com/google/uuid"
 )
 
+type PayMethod string
+
+const (
+	PaymentUpfront      PayMethod = "upfront"
+	PaymentMilestone    PayMethod = "milestone"
+	PaymentUponDelivery PayMethod = "upon_delivery"
+	PaymentSplit        PayMethod = "split"
+)
+
+type QuoteStatus string
+
+const (
+	QuoteStatusDraft     QuoteStatus = "draft"
+	QuoteStatusSent      QuoteStatus = "sent"
+	QuoteStatusAccepted  QuoteStatus = "accepted"
+	QuoteStatusRejected  QuoteStatus = "rejected"
+	QuoteStatusExpired   QuoteStatus = "expired"
+	QuoteStatusConverted QuoteStatus = "converted"
+)
+
+const DefaultQuoteValidityDays = 30
+
 type QuoteRequest struct {
 	ClientName                   string
 	ClientBusiness               *string
@@ -51,36 +73,6 @@ type QuotesModel struct {
 	UpdatedAt                    time.Time
 }
 
-type PayMethod string
-
-const (
-	/*
-		- Proyectos pequenos
-		- Clientes nuevos sin track record
-		- Trabajos de bajo riesgo (plantillas o disenos simples)
-	*/
-	PaymentUpfront PayMethod = "upfront"
-	/*
-		- Desarrollo complejo
-		- Clientes corporativos
-		- Relaciones a largo plazo
-	*/
-	PaymentMilestone PayMethod = "milestone"
-	/*
-		- Proyectos pequenos
-		- Clientes con historial establecido
-		- Entregables simples/tangibles
-		- NO RECOMENDADO PARA PROYECTOS GRANDES
-	*/
-	PaymentUponDelivery PayMethod = "upon_delivery"
-	/*
-		- Proyectos costosos
-		- Clientes nuevos pero con referencias
-		- Proteccion sin ahuyentar al cliente
-	*/
-	PaymentSplit PayMethod = "split"
-)
-
 func (p PayMethod) IsValid() bool {
 	switch p {
 	case PaymentUpfront, PaymentMilestone, PaymentUponDelivery, PaymentSplit:
@@ -90,20 +82,18 @@ func (p PayMethod) IsValid() bool {
 	}
 }
 
-type QuoteStatus string
-
-const (
-	QuoteStatusDraft     QuoteStatus = "draft"
-	QuoteStatusSent      QuoteStatus = "sent"
-	QuoteStatusAccepted  QuoteStatus = "accepted"
-	QuoteStatusRejected  QuoteStatus = "rejected"
-	QuoteStatusExpired   QuoteStatus = "expired"
-	QuoteStatusConverted QuoteStatus = "converted"
-)
-
 func (s QuoteStatus) IsValid() bool {
 	switch s {
 	case QuoteStatusDraft, QuoteStatusSent, QuoteStatusAccepted, QuoteStatusRejected, QuoteStatusExpired, QuoteStatusConverted:
+		return true
+	default:
+		return false
+	}
+}
+
+func (s QuoteStatus) CanBeSent() bool {
+	switch s {
+	case QuoteStatusDraft:
 		return true
 	default:
 		return false
@@ -115,6 +105,7 @@ type QuoteRepository interface {
 	GetQuoteByID(ctx context.Context, id uuid.UUID) (*QuotesModel, error)
 	UpdateQuote(ctx context.Context, quote *QuotesModel) (*QuotesModel, error)
 	DeleteQuote(ctx context.Context, id uuid.UUID) error
+	SendQuote(ctx context.Context, quoteID uuid.UUID, sentAt, validUntil time.Time) error
 }
 
 type QuoteService interface {
@@ -123,4 +114,5 @@ type QuoteService interface {
 	GetQuoteByID(ctx context.Context, id uuid.UUID) (*QuotesModel, error)
 	UpdateQuote(ctx context.Context, quoteID uuid.UUID, newQuote *QuoteRequest) (*QuotesModel, error)
 	DeleteQuote(ctx context.Context, id uuid.UUID) error
+	SendQuote(ctx context.Context, quoteID uuid.UUID) error
 }

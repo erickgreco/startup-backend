@@ -250,3 +250,22 @@ func (s *QuoteService) DeleteQuote(ctx context.Context, id uuid.UUID) error {
 
 	return nil
 }
+
+func (s *QuoteService) SendQuote(ctx context.Context, quoteID uuid.UUID) error {
+	// TODO: obtener quote
+	quote, err := s.quoteRepo.GetQuoteByID(ctx, quoteID)
+	if err != nil {
+		return fmt.Errorf("quote_service: send_quote: %w", err)
+	}
+	// TODO: validar estado draft
+	if !quote.Status.CanBeSent() {
+		return fmt.Errorf("quote_service: send_quote: %w", domain.ErrInvalidStatusTransition)
+	}
+	// TODO: obtener el documento a enviar
+	// TODO: fijar tiempos sentAt y validUntil (trabajar validUntil con base en datos del documento)
+	// sentAt := time.Now()
+	// validUntil := sentAt.AddDate(0, 0, domain.DefaultQuoteValidityDays)
+	// TODO: enviar el email
+	// TODO: persistir a DB
+	return nil
+}
