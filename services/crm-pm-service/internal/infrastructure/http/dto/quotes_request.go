@@ -10,13 +10,13 @@ import (
 type CreateQuoteRequest struct {
 	ClientName                   string        `json:"client_name" binding:"required"`
 	ClientBusiness               *string       `json:"client_business,omitempty"`
-	ClientEmail                  string        `json:"client_email" binding:"required"`
+	ClientEmail                  string        `json:"client_email" binding:"required,email"`
 	ClientPhone                  string        `json:"client_phone_number" binding:"required"`
 	ProjectTitle                 string        `json:"project_title" binding:"required"`
 	ProjectDescription           string        `json:"project_description" binding:"required"`
 	ProjectResume                *string       `json:"project_resume,omitempty"`
-	ProjectEstimatedDurationDays int32         `json:"project_estimated_duration_days" binding:"required"`
-	Items                        []ItemRequest `json:"items" binding:"required"`
+	ProjectEstimatedDurationDays int32         `json:"project_estimated_duration_days" binding:"required,gt=0"`
+	Items                        []ItemRequest `json:"items" binding:"required,dive"`
 	FunctionalityExample         *string       `json:"functionality_example,omitempty"`
 	PaymentMethod                string        `json:"payment_method" binding:"required"`
 	Currency                     string        `json:"currency" binding:"required"`
