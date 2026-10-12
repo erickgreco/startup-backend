@@ -5,7 +5,7 @@ import "github.com/erickgreco/startup-backend/services/crm-pm-service/internal/d
 type UserProfileRequest struct {
 	FirstName       string  `json:"first_name" binding:"required"`
 	LastName        string  `json:"last_name" binding:"required"`
-	Email           string  `json:"email" binding:"required"`
+	Email           string  `json:"email" binding:"required,email"`
 	PhoneNumber     string  `json:"phone_number" binding:"required"`
 	ProfileImageURL *string `json:"profile_image_url,omitempty"`
 	BusinessName    *string `json:"business_name,omitempty"`
