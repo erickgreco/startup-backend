@@ -83,3 +83,22 @@ func (m Money) HasSubCentPrecision() bool {
 
 	return !d.Equal(d.Truncate(2))
 }
+
+// * Devuelve el monto con 2 decimales fijos
+func (m Money) String() string {
+	return decimal.Decimal(m).StringFixed(2)
+}
+
+func ParseMoney(s string) (Money, error) {
+	d, err := decimal.NewFromString(s)
+	if err != nil {
+		return ZeroMoney, fmt.Errorf("parse_money: %q: %w", s, err)
+	}
+
+	m := Money(d)
+	if m.HasSubCentPrecision() {
+		return ZeroMoney, fmt.Errorf("parse_money: %q: sub_cent_precision", s)
+	}
+
+	return m, nil
+}

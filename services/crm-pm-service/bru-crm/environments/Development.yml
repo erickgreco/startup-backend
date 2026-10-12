@@ -5,8 +5,8 @@ variables:
   - name: healthURL
     value: http://localhost:8081/health
   - name: lead_id
-    value: 01a0e9f9-2696-7afc-abca-9966477a02fc
+    value: 01a13187-0262-7280-8713-a35316e21fc8
   - name: quote_id
-    value: 01a0e944-eb49-7d3d-a9e5-c6bc9d08e720
+    value: 01a13189-e857-70a3-a16e-a9407e0d7277
   - name: email
     value: carlos2@techstartup.mx

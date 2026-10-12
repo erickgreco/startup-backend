@@ -8,18 +8,18 @@ import (
 )
 
 type LeadResponseUser struct {
-	ID           uuid.UUID         `json:"id"`
-	Name         string            `json:"name"`
-	BusinessName string            `json:"business_name"`
-	PhoneNumber  string            `json:"phone_number"`
-	Email        string            `json:"email"`
-	Message      string            `json:"message"`
-	DataQuality  domain.Quality    `json:"data_quality"`
-	QualityScore float64           `json:"quality_score"`
-	Status       domain.LeadStatus `json:"status"`
-	Source       domain.LeadSource `json:"source"`
-	CreatedAt    time.Time         `json:"created_at"`
-	UpdatedAt    time.Time         `json:"updated_at"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	BusinessName string    `json:"business_name"`
+	PhoneNumber  string    `json:"phone_number"`
+	Email        string    `json:"email"`
+	Message      string    `json:"message"`
+	DataQuality  string    `json:"data_quality"`
+	QualityScore float64   `json:"quality_score"`
+	Status       string    `json:"status"`
+	Source       string    `json:"source"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type LeadResponseClient struct {
@@ -50,10 +50,10 @@ func toLeadResponseUser(l *domain.LeadsModel) LeadResponseUser {
 		PhoneNumber:  l.PhoneNumber,
 		Email:        l.Email,
 		Message:      l.Message,
-		DataQuality:  l.DataQuality,
+		DataQuality:  string(l.DataQuality),
 		QualityScore: l.QualityScore,
-		Status:       l.Status,
-		Source:       l.Source,
+		Status:       string(l.Status),
+		Source:       string(l.Source),
 		CreatedAt:    l.CreatedAt,
 		UpdatedAt:    l.UpdatedAt,
 	}
