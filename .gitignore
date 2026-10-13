@@ -13,6 +13,7 @@ node_modules
 # OS files
 .DS_Store
 Thumbs.db
+services/crm-pm-service/internal/service/quoteserv/test_quote.pdf
 
 # Tilt build
 build/

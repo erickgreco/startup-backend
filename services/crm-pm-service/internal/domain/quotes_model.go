@@ -59,26 +59,26 @@ const (
 		- Clientes nuevos sin track record
 		- Trabajos de bajo riesgo (plantillas o disenos simples)
 	*/
-	PaymentUpfront PayMethod = "upfront"
+	PaymentUpfront PayMethod = "Upfront"
 	/*
 		- Desarrollo complejo
 		- Clientes corporativos
 		- Relaciones a largo plazo
 	*/
-	PaymentMilestone PayMethod = "milestone"
+	PaymentMilestone PayMethod = "Milestone"
 	/*
 		- Proyectos pequenos
 		- Clientes con historial establecido
 		- Entregables simples/tangibles
 		- NO RECOMENDADO PARA PROYECTOS GRANDES
 	*/
-	PaymentUponDelivery PayMethod = "upon_delivery"
+	PaymentUponDelivery PayMethod = "Upon delivery"
 	/*
 		- Proyectos costosos
 		- Clientes nuevos pero con referencias
 		- Proteccion sin ahuyentar al cliente
 	*/
-	PaymentSplit PayMethod = "split"
+	PaymentSplit PayMethod = "Split"
 )
 
 func (p PayMethod) IsValid() bool {
@@ -88,6 +88,25 @@ func (p PayMethod) IsValid() bool {
 	default:
 		return false
 	}
+}
+
+func (p PayMethod) Translate(lang string) string {
+	if lang == "es" {
+		switch p {
+		case PaymentUpfront:
+			return "Pago anticipado"
+		case PaymentMilestone:
+			return "Por entregable"
+		case PaymentUponDelivery:
+			return "Contra entrega"
+		case PaymentSplit:
+			return "Pago dividido"
+		default:
+			return string(p)
+		}
+	}
+
+	return string(p)
 }
 
 type QuoteStatus string
