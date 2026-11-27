@@ -90,6 +90,25 @@ func (p PayMethod) IsValid() bool {
 	}
 }
 
+func (p PayMethod) Translate(lang string) string {
+	if lang == "es" {
+		switch p {
+		case PaymentUpfront:
+			return "Pago anticipado"
+		case PaymentMilestone:
+			return "Por entregable"
+		case PaymentUponDelivery:
+			return "Contra entrega"
+		case PaymentSplit:
+			return "Pago dividido"
+		default:
+			return string(p)
+		}
+	}
+
+	return string(p)
+}
+
 type QuoteStatus string
 
 const (
