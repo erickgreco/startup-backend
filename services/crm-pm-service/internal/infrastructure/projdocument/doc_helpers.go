@@ -8,10 +8,10 @@ import (
 )
 
 func SetTitleLang(lang, quoteNm string) (string, error) {
-	switch {
-	case lang == "es":
+	switch lang {
+	case "es":
 		return fmt.Sprintf("Cotización No. %s", quoteNm), nil
-	case lang == "en":
+	case "en":
 		return fmt.Sprintf("Quote No. %s", quoteNm), nil
 	default:
 		return "", domain.ErrInvalidLanguage

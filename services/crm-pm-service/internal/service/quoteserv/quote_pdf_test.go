@@ -2,6 +2,7 @@ package quoteserv
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -79,7 +80,7 @@ func TestRenderQuotePDF(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = os.WriteFile("test_quote.pdf", pdf, 0644)
+	err = os.WriteFile(filepath.Join(t.TempDir(), "test_quote.pdf"), pdf, 0o600)
 	if err != nil {
 		t.Fatal(err)
 	}
