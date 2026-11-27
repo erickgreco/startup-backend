@@ -59,26 +59,26 @@ const (
 		- Clientes nuevos sin track record
 		- Trabajos de bajo riesgo (plantillas o disenos simples)
 	*/
-	PaymentUpfront PayMethod = "Upfront"
+	PaymentUpfront PayMethod = "upfront"
 	/*
 		- Desarrollo complejo
 		- Clientes corporativos
 		- Relaciones a largo plazo
 	*/
-	PaymentMilestone PayMethod = "Milestone"
+	PaymentMilestone PayMethod = "milestone"
 	/*
 		- Proyectos pequenos
 		- Clientes con historial establecido
 		- Entregables simples/tangibles
 		- NO RECOMENDADO PARA PROYECTOS GRANDES
 	*/
-	PaymentUponDelivery PayMethod = "Upon delivery"
+	PaymentUponDelivery PayMethod = "upon_delivery"
 	/*
 		- Proyectos costosos
 		- Clientes nuevos pero con referencias
 		- Proteccion sin ahuyentar al cliente
 	*/
-	PaymentSplit PayMethod = "Split"
+	PaymentSplit PayMethod = "split"
 )
 
 func (p PayMethod) IsValid() bool {
